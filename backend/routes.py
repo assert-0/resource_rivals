@@ -10,4 +10,4 @@ api_router = APIRouter()
 
 @api_router.get("/")
 async def placeholder() -> JSONResponse:
-    return {"hello": "world"}
+    return JSONResponse(content={"hello": "world"})
