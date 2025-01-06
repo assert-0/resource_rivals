@@ -1,10 +1,9 @@
-from fastapi import APIRouter
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Request
 
 from simulation.actions.game.create import CreateResponse as GameCreateResponse
 from simulation.actions.game.read import ReadResponse as GameReadResponse
 from simulation.actions.game.team.create import (
-    CreateResponse as TeamCreateResponse
+    CreateResponse as TeamCreateResponse, CreateRequest as TeamCreateRequest
 )
 from simulation.actions.game.team.read import ReadResponse as TeamReadResponse
 
@@ -22,8 +21,9 @@ async def read_game(game_id: str) -> GameReadResponse:
 
 
 @api_router.post("/game/{game_id}/team/")
-async def create_team(game_id: str) -> TeamCreateResponse:
-    pass
+async def create_team(game_id: str, request: Request) -> TeamCreateResponse:
+    request = await request.json()
+    request = TeamCreateRequest(**request)
 
 
 @api_router.get("/game/{game_id}/team/{team_id}")
