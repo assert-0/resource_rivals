@@ -2,12 +2,9 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field, ConfigDict
 
-from utils.math import Point
 
-
-class Entity(BaseModel):
+class Action(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
-    position: Point
     teamId: str
     type: str
     namespace: str
@@ -32,14 +29,13 @@ class Entity(BaseModel):
     def model_post_init(self, *_) -> None:
         from utils.registry import registry
 
-        if isinstance(self, ConcreteEntity):
+        if isinstance(self, ConcreteAction):
             return
 
         actual_cls = registry.get(self.type, self.namespace)
-
-        if not issubclass(actual_cls, Entity):
+        if not issubclass(actual_cls, Action):
             raise ValueError(
-                f"Class {actual_cls} is not a subclass of {Entity}"
+                f"Class {actual_cls} is not a subclass of {Action}"
             )
 
         actual_cls_instance = actual_cls(**self.model_dump())
@@ -50,5 +46,5 @@ class Entity(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-class ConcreteEntity(Entity):
+class ConcreteAction(Action):
     pass

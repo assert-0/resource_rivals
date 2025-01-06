@@ -1,10 +1,10 @@
 from consts import TEAMS_NEUTRAL_ID
-from entities.entity import Entity
+from simulation.actions.action import Action
 
 
-class Obstacle(Entity):
+class GameAction(Action):
     teamId: str = TEAMS_NEUTRAL_ID
 
     @classmethod
     def get_namespace(cls) -> str:
-        return "obstacles"
+        return "game"
