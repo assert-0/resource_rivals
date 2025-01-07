@@ -22,8 +22,8 @@ class Game(BaseModel):
 
     @staticmethod
     def new_game(map_path: str) -> "Game":
-        map = Map.from_file(map_path)
-        return Game(map=map)
+        _map = Map.from_file(map_path)
+        return Game(map=_map)
 
     def get_active_team(self) -> Team:
         return self.teams[self.activeTeamId]

@@ -1,3 +1,4 @@
+from typing import List, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, ConfigDict
@@ -11,6 +12,12 @@ class Entity(BaseModel):
     teamId: str
     type: str
     namespace: str
+
+    def on_turn_start(self, game) -> None:
+        pass
+
+    def on_turn_end(self, game) -> None:
+        pass
 
     @classmethod
     def get_type(cls) -> str:

@@ -9,4 +9,4 @@ class GetAvailableBuildingsRequest(BuildAction, ConcreteAction):
 
 
 class GetAvailableBuildingsResponse(BuildAction, ConcreteAction):
-    availableBuildings: List[BuildAction]
+    availableBuildings: List[List[str]]  # (namespace, type) tuples

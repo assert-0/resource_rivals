@@ -17,12 +17,14 @@ class Map(BaseModel):
 
         self.entities[entity.id] = entity
         self.sectors[entity.position.x][entity.position.y].append(entity)
+        self._recalculate_influence()
 
     def remove_entity(self, entity: Entity):
         self.expect_entity_by_id(entity.id)
 
         del self.entities[entity.id]
         self.sectors[entity.position.x][entity.position.y].remove(entity)
+        self._recalculate_influence()
 
     def update_entity(self, entity: Entity):
         old_entity = self.expect_entity_by_id(entity.id)
@@ -37,6 +39,7 @@ class Map(BaseModel):
 
         self.entities[entity.id] = entity
         self.sectors[entity.position.x][entity.position.y].append(entity)
+        self._recalculate_influence()
 
     def get_entities_at_position(self, x: int, y: int) -> List[Entity]:
         return [entity.model_copy(deep=True) for entity in self.sectors[x][y]]
@@ -99,3 +102,10 @@ class Map(BaseModel):
         tree = ModelSerde.load_model(Map, file_path)
 
         return tree
+
+    def _recalculate_influence(self) -> None:
+        for entity in self.entities.values():
+            influence_cloud = entity.calculate_influence()
+            for position in influence_cloud:
+                x, y = position
+                self.influence[x][y] = entity.teamId
