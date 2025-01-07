@@ -6,7 +6,7 @@ from simulation.game import Game
 
 
 class CreateRequest(GameAction, ConcreteAction):
-    pass
+    mapName: str
 
 
 class CreateResponse(BaseModel):

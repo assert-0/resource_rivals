@@ -1,5 +1,6 @@
 from typing import List, Optional, Set, Collection, Dict
 
+from consts import TEAMS_NEUTRAL_ID
 from entities.entity import Entity
 from utils.model_serde import ModelSerde
 from utils.observer import Observable, ObserverEvent
@@ -8,6 +9,7 @@ from utils.observer import Observable, ObserverEvent
 class Map(Observable):
     sectors: List[List[List[Entity]]]
     entities: Dict[str, Entity]
+    influence: List[List[str]]  # 2D array of team ids
 
     def add_entity(self, entity: Entity):
         entity = entity.model_copy(deep=True)
@@ -87,12 +89,18 @@ class Map(Observable):
         sectors: List[List[List[Entity]]] = [
             [[] for _ in range(h)] for _ in range(w)
         ]
+        influence: List[List[str]] = [
+            [TEAMS_NEUTRAL_ID for _ in range(h)] for _ in range(w)
+        ]
+
         for entity in entities:
             sectors[entity.position.x][entity.position.y].append(entity)
 
         entities_map = {entity.id: entity for entity in entities}
 
-        return Map(sectors=sectors, entities=entities_map)  # type: ignore
+        return Map(
+            sectors=sectors, entities=entities_map, influence=influence
+        )
 
     @staticmethod
     def from_file(file_path: str) -> 'Map':
