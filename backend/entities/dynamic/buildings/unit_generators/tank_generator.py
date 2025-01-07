@@ -1,3 +1,7 @@
+from typing import List
+
+from pydantic import Field
+
 from entities.dynamic.buildings.unit_generators.unit_generator import \
     UnitGenerator
 from entities.dynamic.units.tank import Tank

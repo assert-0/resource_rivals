@@ -9,6 +9,9 @@ class Action(BaseModel):
     type: str
     namespace: str
 
+    def execute(self, game) -> BaseModel:
+        pass
+
     @classmethod
     def get_type(cls) -> str:
         return cls.__name__

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -12,4 +12,4 @@ class GetVisibleMapRequest(TeamAction, ConcreteAction):
 
 
 class GetVisibleMapResponse(BaseModel):
-    sectors: List[List[List[Entity]]]
+    sectors: List[List[Optional[List[Entity]]]]

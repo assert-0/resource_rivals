@@ -69,6 +69,26 @@ UNITS_CONFIG = {
     },
 }
 
+RESOURCE_COLLECTORS_YIELD = {
+    "Sawmill": 2,
+    "Miner": 2,
+    "Farm": 2,
+}
+
+BUILDING_COSTS = {
+    "Sawmill": [0, 0, 0],
+    "Miner": [0, 0, 0],
+    "Farm": [0, 0, 0],
+    "UnitUpgrader": [10, 10, 10],
+    "Barracks": [10, 10, 10],
+    "WorkerGenerator": [10, 10, 10],
+    "SoldierGenerator": [10, 10, 10],
+    "RangedGenerator": [10, 10, 10],
+    "TankGenerator": [10, 10, 10],
+    "ScoutGenerator": [10, 10, 10],
+    "Capital": [0, 0, 0],
+}
+
 REGISTRY_SEARCH_PATHS = [
     "entities/dynamic", "entities/static", "simulation/actions"
 ]
@@ -77,4 +97,4 @@ REGISTRY_BASE_CLASSES = [
     "simulation.actions.action.ConcreteAction"
 ]
 
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.INFO

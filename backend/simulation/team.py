@@ -14,6 +14,22 @@ class Resources(BaseModel):
     wood: int = 0
     minerals: int = 0
 
+    def can_afford(self, cost: "Resources") -> bool:
+        return all(
+            getattr(self, resource) >= getattr(cost, resource)
+            for resource in self.model_fields.keys()
+        )
+
+    def pay(self, cost: "Resources") -> None:
+        if not self.can_afford(cost):
+            raise ValueError("Not enough resources")
+
+        for resource in self.model_fields.keys():
+            setattr(
+                self, resource,
+                getattr(self, resource) - getattr(cost, resource)
+            )
+
 
 class Team(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
@@ -21,6 +37,7 @@ class Team(BaseModel):
     visibleArea: Set[Point] = Field(default_factory=set)
     resources: Resources = Resources()
     maxPopulation: int = TEAMS_STARTING_POPULATION
+    isDefeated: bool = False
 
     def get_current_population(self, _map: Map) -> int:
         population = 0
@@ -29,3 +46,8 @@ class Team(BaseModel):
                 population += 1
 
         return population
+
+    def recalculate_visible_area(self, _map: Map) -> None:
+        for entity in _map.get_entities_by_team(self.id):
+            if isinstance(entity, Unit):
+                self.visibleArea.update(entity.get_visible_area(_map))

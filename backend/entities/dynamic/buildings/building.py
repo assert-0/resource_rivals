@@ -1,17 +1,28 @@
 from typing import List, Type, Optional
 
+from consts import BUILDING_COSTS
 from entities.dynamic.units.unit import Unit
 from entities.entity import Entity
 from utils.math import Point
 
 
 class Building(Entity):
+    cost: List[int]  # food, wood, minerals
+
+    def __init__(self, **kwargs):
+        kwargs['cost'] = self.get_cost()
+        super().__init__(**kwargs)
+
     def calculate_influence(
             self,
             sectors: List[List[List['Entity']]],
             influence: List[List[str]],
     ) -> List[Point]:
         return []
+
+    def on_turn_start(self, game) -> None:
+        super().on_turn_start(game)
+        self._handle_conquering(game)
 
     @classmethod
     def get_namespace(cls) -> str:
@@ -33,6 +44,9 @@ class Building(Entity):
             game.map.remove_entity(unit)
             self.generate_unit(game, target_type)
 
+    def get_cost(self) -> List[int]:
+        return BUILDING_COSTS[self.__class__.__name__]
+
     def _can_generate_unit(self, game) -> bool:
         current_sector = game.map.sectors[self.position.x][self.position.y]
         current_population = game.teams[self.teamId].get_current_population()
@@ -44,3 +58,15 @@ class Building(Entity):
             if isinstance(entity, unit_type):
                 return entity
         return None
+
+    def _handle_conquering(self, game) -> None:
+        if self._is_conquered(game):
+            game.map.remove_entity(self)
+
+    def _is_conquered(self, game) -> bool:
+        current_sector = game.map.sectors[self.position.x][self.position.y]
+        for entity in current_sector:
+            if isinstance(entity, Unit) and entity.teamId != self.teamId:
+                return True
+
+        return False

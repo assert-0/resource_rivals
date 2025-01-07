@@ -1,4 +1,4 @@
-from typing import Dict, Set
+from typing import Dict, Set, Any
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -21,7 +21,7 @@ class Game(BaseModel):
     winningTeamId: str = TEAMS_NEUTRAL_ID
 
     @staticmethod
-    def new_game(map_path: str) -> "Game":
+    def new_game(map_path: str, **__) -> "Game":
         _map = Map.from_file(map_path)
         return Game(map=_map)
 
@@ -38,6 +38,20 @@ class Game(BaseModel):
         self.activeTeamId = list(self.teams.keys())[0]
 
         self._mark_capitals()
+
+    def execute_action(self, action) -> BaseModel:
+        if self.state != GameStates.IN_PROGRESS:
+            raise ValueError("Game is not in progress")
+
+        self.history.mapStates.append(self.map.model_copy(deep=True))
+        self.history.actions.append(action.model_copy(deep=True))
+        return action.execute(self)
+
+    def end_turn(self) -> None:
+        if winning_team := self._has_ended():
+            self.stop(winning_team)
+
+        self.activeTeamId = self._get_next_team_id()
 
     def stop(self, winning_team_id: str = TEAMS_NEUTRAL_ID) -> None:
         self.state = GameStates.FINISHED
@@ -59,3 +73,9 @@ class Game(BaseModel):
             capital.teamId = team.id
 
         self.map.update_entities(capitals)
+
+    def _get_next_team_id(self) -> str:
+        team_ids = list(self.teams.keys())
+        current_team_index = team_ids.index(self.activeTeamId)
+        next_team_index = (current_team_index + 1) % len(team_ids)
+        return team_ids[next_team_index]

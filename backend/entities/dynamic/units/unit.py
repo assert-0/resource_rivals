@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Set
 
 from pydantic import Field
 
@@ -50,10 +50,12 @@ class Unit(Entity):
         _map.update_entity(self)
 
     def calculate_reachable_sectors(
-            self, sectors: List[List[List[Entity]]]
+            self, game
     ) -> List[Point]:
         movable_sectors = []
         attackable_sectors = []
+
+        sectors = game.map.sectors
 
         for i, row in enumerate(sectors):
             for j, sector in enumerate(row):
@@ -73,8 +75,20 @@ class Unit(Entity):
 
         return movable_sectors + attackable_sectors
 
-    def calculate_fog_of_war(self) -> List[Point]:
-        return []
+    def calculate_visible_area(self) -> Set[Point]:
+        visible_sectors = set()
+
+        for i in range(
+                self.position.x - self.attackRange,
+                self.position.x + self.attackRange + 1
+        ):
+            for j in range(
+                    self.position.y - self.attackRange,
+                    self.position.y + self.attackRange + 1
+            ):
+                visible_sectors.add(Point(i, j))
+
+        return visible_sectors
 
     def get_health(self) -> int:
         return UNITS_CONFIG[self.__class__.__name__]['health']
@@ -92,7 +106,7 @@ class Unit(Entity):
         return UNITS_CONFIG[self.__class__.__name__]['attackRange']
 
     def calculate_available_buildings(
-            self, current_sector: List[Entity], _map
+            self, game
     ) -> List[List[str]]:  # (namespace, type) tuples
         return []
 
