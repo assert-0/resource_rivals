@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from simulation.actions.action import ConcreteAction
 from simulation.actions.game.team.unit.build.build_action import BuildAction
@@ -10,4 +10,4 @@ class GetAvailableBuildingsRequest(BuildAction, ConcreteAction):
 
 
 class GetAvailableBuildingsResponse(Response):
-    availableBuildings: List[List[str]]  # (namespace, type) tuples
+    availableBuildings: Optional[List[List[str]]]  # (namespace, type) tuples

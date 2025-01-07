@@ -124,8 +124,16 @@ async def get_visible_map(
 @api_router.post(
     "/game/{game_id}/team/{team_id}/end-turn", response_model=None
 )
-async def end_turn(game_id: str, team_id: str, response: Response) -> None:
-    pass
+async def end_turn(
+        game_id: str, team_id: str, response: Response
+) -> GenericResponse:
+    try:
+        server.get_game(game_id).end_turn()
+    except ValueError as e:
+        response.status_code = 400
+        return GenericResponse(error=str(e))
+
+    return GenericResponse()
 
 
 @api_router.post(
@@ -136,7 +144,18 @@ async def create_building(
         game_id: str, team_id: str, unit_id: str, request: Request
 ) -> BuildCreateResponse:
     request = await request.json()
-    parsed_request = BuildCreateRequest(**request)
+    parsed_request = BuildCreateRequest(**request, teamId=team_id)
+
+    try:
+        game = server.get_game(game_id)
+        unit = game.map.entities[unit_id]
+        building = unit.build(
+            parsed_request.buildingNamespace, parsed_request.buildingType, game
+        )
+    except ValueError as e:
+        return BuildCreateResponse(error=str(e), building=None)
+
+    return BuildCreateResponse(building=building)
 
 
 @api_router.get(
@@ -144,9 +163,21 @@ async def create_building(
     response_model=UnitGetAvailableBuildingsResponse
 )
 async def get_available_buildings(
-        game_id: str, team_id: str, unit_id: str
+        game_id: str, team_id: str, unit_id: str, response: Response
 ) -> UnitGetAvailableBuildingsResponse:
-    pass
+    try:
+        game = server.get_game(game_id)
+        unit = game.map.entities[unit_id]
+        available_buildings = unit.calculate_available_buildings()
+    except ValueError as e:
+        response.status_code = 400
+        return UnitGetAvailableBuildingsResponse(
+            error=str(e), availableBuildings=None
+        )
+
+    return UnitGetAvailableBuildingsResponse(
+        availableBuildings=available_buildings
+    )
 
 
 @api_router.post(
@@ -155,9 +186,18 @@ async def get_available_buildings(
 )
 async def move_unit(
         game_id: str, team_id: str, unit_id: str, request: Request
-) -> None:
+) -> GenericResponse:
     request = await request.json()
-    parsed_request = MoveCreateRequest(**request)
+    parsed_request = MoveCreateRequest(**request, teamId=team_id)
+
+    try:
+        game = server.get_game(game_id)
+        unit = game.map.entities[unit_id]
+        unit.act(parsed_request.targetPosition, game.map)
+    except ValueError as e:
+        return GenericResponse(error=str(e))
+
+    return GenericResponse()
 
 
 @api_router.get(
@@ -167,4 +207,13 @@ async def move_unit(
 async def get_reachable_sectors(
         game_id: str, team_id: str, unit_id: str
 ) -> UnitGetReachableSectorsResponse:
-    pass
+    try:
+        game = server.get_game(game_id)
+        unit = game.map.entities[unit_id]
+        reachable_sectors = unit.calculate_reachable_sectors(game)
+    except ValueError as e:
+        return UnitGetReachableSectorsResponse(
+            error=str(e), sectors=None
+        )
+
+    return UnitGetReachableSectorsResponse(sectors=reachable_sectors)

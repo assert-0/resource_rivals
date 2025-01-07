@@ -58,7 +58,7 @@ class Worker(Unit, ConcreteEntity):
             for building in resource_buildings + other_buildings
         ]
 
-    def build(self, namespace: str, type: str, game) -> None:
+    def build(self, namespace: str, type: str, game) -> Building:
         from utils.registry import registry
 
         building_cls = registry.get(type, namespace)
@@ -82,3 +82,5 @@ class Worker(Unit, ConcreteEntity):
             game.map.remove_entity(self)
         else:
             raise ValueError("Not enough resources to build")
+
+        return building_instance

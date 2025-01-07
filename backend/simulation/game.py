@@ -39,14 +39,6 @@ class Game(BaseModel):
 
         self._mark_capitals()
 
-    def execute_action(self, action) -> BaseModel:
-        if self.state != GameStates.IN_PROGRESS:
-            raise ValueError("Game is not in progress")
-
-        self.history.mapStates.append(self.map.model_copy(deep=True))
-        self.history.actions.append(action.model_copy(deep=True))
-        return action.execute(self)
-
     def end_turn(self) -> None:
         if winning_team := self._has_ended():
             self.stop(winning_team)
@@ -79,3 +71,15 @@ class Game(BaseModel):
         current_team_index = team_ids.index(self.activeTeamId)
         next_team_index = (current_team_index + 1) % len(team_ids)
         return team_ids[next_team_index]
+
+    def _has_ended(self) -> str:
+        undefeated_teams = []
+
+        for team in self.teams.values():
+            if not team.isDefeated:
+                undefeated_teams.append(team.id)
+
+        if len(undefeated_teams) == 1:
+            return undefeated_teams[0]
+
+        return ""

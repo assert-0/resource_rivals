@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -13,4 +13,4 @@ class GetReachableSectorsRequest(MoveAction, ConcreteAction):
 
 
 class GetReachableSectorsResponse(Response):
-    sectors: List[Point]
+    sectors: Optional[List[Point]]

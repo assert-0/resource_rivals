@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 from entities.entity import Entity
@@ -12,4 +14,4 @@ class CreateRequest(BuildAction, ConcreteAction):
 
 
 class CreateResponse(Response):
-    building: Entity
+    building: Optional[Entity]

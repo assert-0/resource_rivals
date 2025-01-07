@@ -24,6 +24,20 @@ class Unit(Entity):
 
         super().__init__(**kwargs)
 
+    def act(self, target_position: Point, _map) -> None:
+        target_sector = _map.sectors[target_position.x][target_position.y]
+        target = None
+
+        for entity in target_sector:
+            if isinstance(entity, Unit) and entity.teamId != self.teamId:
+                target = entity
+                break
+
+        if target is None:
+            self.move(target_position, _map)
+        else:
+            self.attack(target, _map)
+
     def attack(self, target: 'Unit', _map) -> None:
         if not self._check_in_attack_range(target.position):
             raise ValueError("Target is out of range")
