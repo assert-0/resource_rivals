@@ -674,13 +674,20 @@ func clearActions():
 	
 # TODO
 func move(location):
-	var error = send_request("/bruhendpoiunt" , [], HTTPClient.METHOD_POST, 
-		str(selected_cell.location) + " " + str(location) + "idk upit il nes")
+	if internet_enabled:
+		var name = "move"
+		var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
+			 + "/visible-map" , [], HTTPClient.METHOD_POST, JSON.stringify({}))
+		
+		if error != OK:
+			push_error(name + " move")
+		
+		await http_completed
+		
+		getJson(name, body)
+		
 	
-	await http_completed
-	
-	
-	clearActions()
+	resetMap()
 	
 	
 	
@@ -701,10 +708,7 @@ func getVisibleMap():
 		if error != OK:
 			push_error(name + " getVisibleMap")
 		
-		print("awaiting")
 		await http_completed
-		
-		print("awaited")
 		
 		getJson(name, body)
 
