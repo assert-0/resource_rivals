@@ -1,0 +1,68 @@
+Format: glTF/glb
+
+
+Zgrade (buildings):
+
+	Main city (Capital)
+		- https://skfb.ly/oVCYZ
+
+	Miner (rudnik)
+		- https://sketchfab.com/3d-models/crystal-mine-84f1cd8c378249d981ba485a63b906f3
+	Sawmill
+		- https://sketchfab.com/3d-models/joshua-tree-mine-well-pump-f39403d6e85442df8cc753abbfb49740
+	Farm
+		- https://skfb.ly/oTV7I
+Jedinične ustanove (unit generators/upgraders):
+
+	Worker generator
+		- https://www.cgtrader.com/items/4072280/download-page
+	Scout generator
+		- 
+	Soldier generator
+		- 
+	Tank generator
+		- 
+	Ranged generator
+		- 
+	Unit upgrader
+		- 
+	Barracks (za povećanje populacije)
+		- 
+	
+Jedinice (units):
+
+	Worker
+		- 
+	Scout
+		- 
+	Cavalry (advanced scout)
+		- 
+	Soldier
+		- https://skfb.ly/oATOX
+	Advanced soldier
+		- 
+	Tank
+		- https://www.cgtrader.com/items/3839708/download-page
+	Advanced tank
+		- https://www.cgtrader.com/items/5194605/download-page
+	Ranged (sniper)
+		- 
+	Advanced ranged
+		- 
+	
+Statički objekti i resursi:
+
+	Mountain (prepreke)
+		- https://skfb.ly/oOKGP
+	Wood
+		- https://sketchfab.com/3d-models/wood-015ae0ebca81446d948b25b95608de93
+	Mineral
+		- https://sketchfab.com/3d-models/magnesite-mineral-ffb21659cc444eb9b475b3dc89176596
+	Food (resursi)
+		- https://sketchfab.com/3d-models/food-5ab165f80fd84edc8a4c96f7448c5b42
+	
+	
+	
+	
+	
+	

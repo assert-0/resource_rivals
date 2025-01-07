@@ -1,0 +1,8 @@
+Model Information:
+* title:	Magnesite mineral
+* source:	https://sketchfab.com/3d-models/magnesite-mineral-ffb21659cc444eb9b475b3dc89176596
+* author:	Museo [UV] Historia Natural (https://sketchfab.com/MUVHN)
+
+Model License:
+* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
+* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
