@@ -14,11 +14,11 @@ var selected_entity: Entity
 
 var not_selected = Color("dark gray", 0.06)
 var selected = Color("yellow", 0.3)
-var movable = Color("green", 0.3)
+var movable = Color("blue", 0.3)
 
 var testing = true
 
-var internet_enabled = true
+var internet_enabled = false
 
 var url: String = "http://127.0.0.1:8000" + "/api/v1"
 
@@ -110,7 +110,7 @@ class Game:
 		
 		if true:
 			map = Map.new()
-			map.setFromJSON(JSON.parse_string('{"sectors":[[[{"id":"1c83c71f-f051-40ba-b591-183e040addd6","position":{"x":0,"y":0},"teamId":"34214631246321463123","type":"Capital","namespace":"buildings"}],[],[],[{"id":"58eb376a-ed8b-4084-be05-0c4c646e23c3","position":{"x":0,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"eda37701-ab8c-4ffc-8365-4952db04768b","position":{"x":1,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"eb19e8af-97c9-447c-8c20-ad44c578c254","position":{"x":2,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b","position":{"x":3,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b","position":{"x":4,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"af948946-2b96-4aca-91a9-867388fe1164","position":{"x":5,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"1d2ce34c-a969-41e1-a284-d9b6b439a598","position":{"x":6,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[],[],[],[],[{"id":"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf","position":{"x":7,"y":7},"teamId":"91463216425320541230","type":"Capital","namespace":"buildings"}]]],"entities":{"1c83c71f-f051-40ba-b591-183e040addd6":{"id":"1c83c71f-f051-40ba-b591-183e040addd6","position":{"x":0,"y":0},"teamId":"34214631246321463123","type":"Capital","namespace":"buildings"},"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf":{"id":"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf","position":{"x":7,"y":7},"teamId":"91463216425320541230","type":"Capital","namespace":"buildings"},"58eb376a-ed8b-4084-be05-0c4c646e23c3":{"id":"58eb376a-ed8b-4084-be05-0c4c646e23c3","position":{"x":0,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"eda37701-ab8c-4ffc-8365-4952db04768b":{"id":"eda37701-ab8c-4ffc-8365-4952db04768b","position":{"x":1,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"eb19e8af-97c9-447c-8c20-ad44c578c254":{"id":"eb19e8af-97c9-447c-8c20-ad44c578c254","position":{"x":2,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b":{"id":"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b","position":{"x":3,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b":{"id":"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b","position":{"x":4,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"af948946-2b96-4aca-91a9-867388fe1164":{"id":"af948946-2b96-4aca-91a9-867388fe1164","position":{"x":5,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"1d2ce34c-a969-41e1-a284-d9b6b439a598":{"id":"1d2ce34c-a969-41e1-a284-d9b6b439a598","position":{"x":6,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}},"influence":[["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"]]}'))
+			map.setFromJSON(JSON.parse_string('{"sectors":[[[{"id":"1c83c71f-f051-40ba-b591-183e040addd6","position":{"x":0,"y":0},"teamId":"34214631246321463123","type":"Capital","namespace":"buildings"}],[{"id":"7a8929bc-650b-4375-84a5-e0c0f88a7832","position":{"x":0,"y":1},"teamId":"4532164312","type":"Soldier","namespace":"units","health":10,"armor":1,"damage":2,"movementRange":2,"attackRange":1}],[],[{"id":"58eb376a-ed8b-4084-be05-0c4c646e23c3","position":{"x":0,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"eda37701-ab8c-4ffc-8365-4952db04768b","position":{"x":1,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"eb19e8af-97c9-447c-8c20-ad44c578c254","position":{"x":2,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b","position":{"x":3,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b","position":{"x":4,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"af948946-2b96-4aca-91a9-867388fe1164","position":{"x":5,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"1d2ce34c-a969-41e1-a284-d9b6b439a598","position":{"x":6,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[],[],[],[],[{"id":"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf","position":{"x":7,"y":7},"teamId":"91463216425320541230","type":"Capital","namespace":"buildings"}]]],"entities":{"1c83c71f-f051-40ba-b591-183e040addd6":{"id":"1c83c71f-f051-40ba-b591-183e040addd6","position":{"x":0,"y":0},"teamId":"34214631246321463123","type":"Capital","namespace":"buildings"},"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf":{"id":"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf","position":{"x":7,"y":7},"teamId":"91463216425320541230","type":"Capital","namespace":"buildings"},"58eb376a-ed8b-4084-be05-0c4c646e23c3":{"id":"58eb376a-ed8b-4084-be05-0c4c646e23c3","position":{"x":0,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"eda37701-ab8c-4ffc-8365-4952db04768b":{"id":"eda37701-ab8c-4ffc-8365-4952db04768b","position":{"x":1,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"eb19e8af-97c9-447c-8c20-ad44c578c254":{"id":"eb19e8af-97c9-447c-8c20-ad44c578c254","position":{"x":2,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b":{"id":"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b","position":{"x":3,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b":{"id":"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b","position":{"x":4,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"af948946-2b96-4aca-91a9-867388fe1164":{"id":"af948946-2b96-4aca-91a9-867388fe1164","position":{"x":5,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"1d2ce34c-a969-41e1-a284-d9b6b439a598":{"id":"1d2ce34c-a969-41e1-a284-d9b6b439a598","position":{"x":6,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}},"influence":[["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"]]}'))
 		
 		#print(id)
 		#print(map)
@@ -392,11 +392,13 @@ var building_types = [
 
 func getSectorsAllEntities():
 	var entities = {}
-	for sector in game.map.sectors:
-		for data in sector:
-			var entity = Entity.new()
-			entity.setFromJSON(data)
-			entities[entity["id"]] = entity
+	for i in range(field_size):
+		for j in range(field_size):
+			var sector = game.map.sectors[i][j]
+			for data in sector:
+				var entity = Entity.new()
+				entity.setFromJSON(data)
+				entities[entity["id"]] = entity
 	return entities
 
 func resetMap(data):
@@ -411,7 +413,6 @@ func loadSectors(data):
 	game.map.sectors = data
 
 func _ready():
-	print('yep')
 	http_request = HTTPRequest.new()
 	add_child(http_request)
 	http_request.request_completed.connect(self._http_request_completed)
@@ -485,16 +486,20 @@ func _ready():
 	prepareUnits()
 	
 	await startGame()
-	
-	print(json.data.keys())
+	#
+	#print(json.data.keys())
 	
 	await getVisibleMap()
 	
-	print(json.data.keys())
+	if internet_enabled:
+		#print(json.data.keys())
+		
+		var map_data = json.data["sectors"]
+		
+		resetMap(map_data)
 	
-	var map_data = json.data["sectors"]
-	
-	resetMap(map_data)
+	else:
+		resetMap(game.map.sectors)
 	
 	#var gltf_document_load = GLTFDocument.new()
 	#var gltf_state_load = GLTFState.new()
@@ -558,7 +563,7 @@ func selectedCell(location: Vector2i) -> void:
 		
 		var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
 			 + "/end-unit/" + selected_entity.id + "/build/available-buildings", 
-			["header"], HTTPClient.METHOD_POST, "")
+			[], HTTPClient.METHOD_POST, JSON.stringify({}))
 		
 		if error != OK:
 			push_error(name + " sendRequest available")
@@ -587,7 +592,7 @@ func selectedCell(location: Vector2i) -> void:
 		
 		error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
 			 + "/end-unit/" + selected_entity.id + "/move/reachable-sectors", 
-			["header"], HTTPClient.METHOD_POST, "")
+			[], HTTPClient.METHOD_POST, JSON.stringify({}))
 		
 		if error != OK:
 			push_error(name + " sendRequest available")
@@ -601,6 +606,19 @@ func selectedCell(location: Vector2i) -> void:
 		setAvailableMoves(reachable_sectors)
 		
 		colorAvailableMoves(movable)
+		
+	else:
+		var reachable_sectors = [
+			{"x":0, "y":0},
+			{"x":0, "y":2},
+			{"x":1, "y":1}
+			]
+			
+		setAvailableMoves(reachable_sectors)
+			
+		colorAvailableMoves(movable)
+	
+		
 	
 	# work with results -> result, response_code, headers, body
 
@@ -635,10 +653,12 @@ func clearActions():
 	
 	if (selected_cell != null):
 		colorObject(selected_cell, not_selected)
+		
+	print(selected_cell.location)
 	
 # TODO
 func move(location):
-	var error = send_request("/bruhendpoiunt" , ["header"], HTTPClient.METHOD_POST, 
+	var error = send_request("/bruhendpoiunt" , [], HTTPClient.METHOD_POST, 
 		str(selected_cell.location) + " " + str(location) + "idk upit il nes")
 	
 	await http_completed
@@ -657,9 +677,10 @@ func getJson(where, body):
 			" at line " + json.get_error_line())
 
 func getVisibleMap():
+	if internet_enabled:
 		var name = "getVisibleMap"
 		var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
-			 + "/visible-map" , ["header"], HTTPClient.METHOD_POST, "")
+			 + "/visible-map" , [], HTTPClient.METHOD_POST, JSON.stringify({}))
 		
 		if error != OK:
 			push_error(name + " getVisibleMap")
@@ -674,7 +695,7 @@ func getVisibleMap():
 func startGame():
 	if internet_enabled:
 		var name = "startGame"
-		var error = send_request("/game" , ["header"], HTTPClient.METHOD_POST, "")
+		var error = send_request("/game" , [], HTTPClient.METHOD_POST, JSON.stringify({"mapName": "mapa"}))
 		
 		#print(error)
 		
@@ -683,8 +704,9 @@ func startGame():
 		
 		await http_completed
 		
-		#print(body)
-		#print(json.parse(body))
+		print(response_code)
+		print(body)
+		print(json.parse(body))
 		
 		getJson(name, body)
 		
@@ -819,7 +841,7 @@ func buildingSelected(event: InputEvent, extra_arg_0: String) -> void:
 		if internet_enabled:
 			var name = "buildingSelected"
 			var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
-				 + "/unit/" + selected_entity.id + "/build" , ["header"], HTTPClient.METHOD_POST, 
+				 + "/unit/" + selected_entity.id + "/build" , [], HTTPClient.METHOD_POST, 
 				JSON.stringify({
 					"buildingType": building_types[pos],
 					"buildingNamespace": building_ns[pos]
@@ -836,7 +858,7 @@ func newTurnPressed():
 	if internet_enabled:
 		var name = "newTurnPressed"
 		var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
-			 + "/end-turn" , ["header"], HTTPClient.METHOD_POST, "")
+			 + "/end-turn" , [], HTTPClient.METHOD_POST, JSON.stringify({}))
 		
 		if error != OK:
 			push_error(name + " newTurnPressed")
@@ -868,11 +890,12 @@ func _input(event: InputEvent) -> void:
 		clearActions()
 
 func send_request(endpoint: String, headers: PackedStringArray, method: HTTPClient.Method, data: String):
-	var error = http_request.request(url, headers, method, data)
+	var error = http_request.request(url+endpoint, headers, method, data)
 	if error != OK:
 		push_error("An error occurred in the HTTP request.")
 	
 	print("requestted http")	
+	print(url+endpoint, headers, method, data)
 	
 	return error
 	
