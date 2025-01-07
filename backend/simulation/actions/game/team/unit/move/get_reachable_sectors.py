@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from simulation.actions.action import ConcreteAction
 from simulation.actions.game.team.unit.move.move_action import MoveAction
+from simulation.actions.response import Response
 from utils.math import Point
 
 
@@ -11,5 +12,5 @@ class GetReachableSectorsRequest(MoveAction, ConcreteAction):
     pass
 
 
-class GetReachableSectorsResponse(BaseModel):
+class GetReachableSectorsResponse(Response):
     sectors: List[Point]

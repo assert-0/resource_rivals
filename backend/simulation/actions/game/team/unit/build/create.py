@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from entities.entity import Entity
 from simulation.actions.action import ConcreteAction
 from simulation.actions.game.team.unit.build.build_action import BuildAction
+from simulation.actions.response import Response
 
 
 class CreateRequest(BuildAction, ConcreteAction):
@@ -10,5 +11,5 @@ class CreateRequest(BuildAction, ConcreteAction):
     buildingNamespace: str
 
 
-class CreateResponse(BaseModel):
+class CreateResponse(Response):
     building: Entity

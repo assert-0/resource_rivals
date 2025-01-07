@@ -22,3 +22,6 @@ class Server:
                 self.games.remove(game)
                 return
         raise ValueError(f"Game with id {game_id} not found")
+
+
+server = Server()
