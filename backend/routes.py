@@ -70,6 +70,13 @@ async def get_visible_map(
 
 
 @api_router.post(
+    "/game/{game_id}/team/{team_id}/end-turn", response_model=None
+)
+async def end_turn(game_id: str, team_id: str, response: Response) -> None:
+    pass
+
+
+@api_router.post(
     "/game/{game_id}/team/{team_id}/unit/{unit_id}/build",
     response_model=BuildCreateResponse
 )
