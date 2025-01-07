@@ -2,6 +2,7 @@ extends Node
 
 class_name Main
 
+signal http_completed
 
 var field_size = 8
 var field
@@ -17,9 +18,9 @@ var movable = Color("green", 0.3)
 
 var testing = true
 
-var internet_enabled = false
+var internet_enabled = true
 
-var url: String = "ip" + "/api/v1"
+var url: String = "http://127.0.0.1:8000" + "/api/v1"
 
 var json: JSON
 
@@ -363,6 +364,19 @@ var button_text = [
 	"Miner",
 ]
 
+var building_ns = [
+	'buildings',
+	'buildings',
+	'buildings/unit_generators',
+	'buildings/unit_generators',
+	'buildings/unit_generators',
+	'buildings/unit_generators',
+	'buildings/unit_generators',
+	'buildings/resource_collectors',
+	'buildings/resource_collectors',
+	'buildings/resource_collectors',
+]
+
 var building_types = [
 	"UnitUpgrader",
 	"Barracks",
@@ -397,8 +411,11 @@ func loadSectors(data):
 	game.map.sectors = data
 
 func _ready():
-	http_request = get_node("HTTPRequest")
+	print('yep')
+	http_request = HTTPRequest.new()
+	add_child(http_request)
 	http_request.request_completed.connect(self._http_request_completed)
+		
 	json = JSON.new()
 	
 	label = get_node("UserInterface/Label")
@@ -467,9 +484,11 @@ func _ready():
 	
 	prepareUnits()
 	
-	startGame()
+	await startGame()
 	
-	getVisibleMap()
+	print(json.data.keys())
+	
+	await getVisibleMap()
 	
 	print(json.data.keys())
 	
@@ -516,7 +535,7 @@ func getSelectedEntity(location: Vector2i) -> Entity:
 func selectedCell(location: Vector2i) -> void:
 	if (availible_moves[location.x][location.y] != null):
 		if internet_enabled:
-			move(location)
+			await move(location)
 		return
 
 	if (selected_cell == null || selected_cell.location != location):
@@ -539,12 +558,12 @@ func selectedCell(location: Vector2i) -> void:
 		
 		var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
 			 + "/end-unit/" + selected_entity.id + "/build/available-buildings", 
-			HTTPClient.METHOD_POST, "")
+			["header"], HTTPClient.METHOD_POST, "")
 		
 		if error != OK:
 			push_error(name + " sendRequest available")
 		
-		await http_request.request_completed
+		await http_completed
 		
 		getJson(name, body)
 		
@@ -568,12 +587,12 @@ func selectedCell(location: Vector2i) -> void:
 		
 		error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
 			 + "/end-unit/" + selected_entity.id + "/move/reachable-sectors", 
-			HTTPClient.METHOD_POST, "")
+			["header"], HTTPClient.METHOD_POST, "")
 		
 		if error != OK:
 			push_error(name + " sendRequest available")
 		
-		await http_request.request_completed
+		await http_completed
 		
 		getJson(name, body)
 		
@@ -619,10 +638,10 @@ func clearActions():
 	
 # TODO
 func move(location):
-	var error = send_request("/bruhendpoiunt" , 0, str(selected_cell.location) + " " + \
-													str(location) + "idk upit il nes")
+	var error = send_request("/bruhendpoiunt" , ["header"], HTTPClient.METHOD_POST, 
+		str(selected_cell.location) + " " + str(location) + "idk upit il nes")
 	
-	await http_request.request_completed
+	await http_completed
 	
 	
 	clearActions()
@@ -640,24 +659,32 @@ func getJson(where, body):
 func getVisibleMap():
 		var name = "getVisibleMap"
 		var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
-			 + "/visible-map" , HTTPClient.METHOD_POST, "")
+			 + "/visible-map" , ["header"], HTTPClient.METHOD_POST, "")
 		
 		if error != OK:
 			push_error(name + " getVisibleMap")
 		
-		await http_request.request_completed
+		print("awaiting")
+		await http_completed
+		
+		print("awaited")
 		
 		getJson(name, body)
 
 func startGame():
 	if internet_enabled:
 		var name = "startGame"
-		var error = send_request("/game" , HTTPClient.METHOD_POST, "")
+		var error = send_request("/game" , ["header"], HTTPClient.METHOD_POST, "")
+		
+		#print(error)
 		
 		if error != OK:
 			push_error(name + " startGame")
 		
-		await http_request.request_completed
+		await http_completed
+		
+		#print(body)
+		#print(json.parse(body))
 		
 		getJson(name, body)
 		
@@ -788,17 +815,33 @@ func startGame():
 func buildingSelected(event: InputEvent, extra_arg_0: String) -> void:
 	if (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 		print(extra_arg_0)
+		var pos = building_types.find(extra_arg_0)
+		if internet_enabled:
+			var name = "buildingSelected"
+			var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
+				 + "/unit/" + selected_entity.id + "/build" , ["header"], HTTPClient.METHOD_POST, 
+				JSON.stringify({
+					"buildingType": building_types[pos],
+					"buildingNamespace": building_ns[pos]
+				}))
+			
+			if error != OK:
+				push_error(name + " buildingSelected")
+			
+			await http_completed
+			
+			getJson(name, body)
 	
 func newTurnPressed():
 	if internet_enabled:
 		var name = "newTurnPressed"
 		var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
-			 + "/end-turn" , HTTPClient.METHOD_POST, "")
+			 + "/end-turn" , ["header"], HTTPClient.METHOD_POST, "")
 		
 		if error != OK:
-			push_error(name + " sendRequest")
+			push_error(name + " newTurnPressed")
 		
-		await http_request.request_completed
+		await http_completed
 		
 		getJson(name, body)
 	
@@ -824,18 +867,26 @@ func _input(event: InputEvent) -> void:
 	if (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT):
 		clearActions()
 
-func send_request(endpoint: String, method: HTTPClient.Method, data: String):
-	var headers: PackedStringArray = PackedStringArray(["hello", "world"])
+func send_request(endpoint: String, headers: PackedStringArray, method: HTTPClient.Method, data: String):
 	var error = http_request.request(url, headers, method, data)
 	if error != OK:
 		push_error("An error occurred in the HTTP request.")
+	
+	print("requestted http")	
+	
 	return error
 	
 func _http_request_completed(_result, _response_code, _headers, _body):
+	print("_http_request_completed start")
+	
 	if _result != HTTPRequest.RESULT_SUCCESS:
-		push_error("Image couldn't be downloaded. Try a different image.")
+		push_error("HTTP request unsuccessful.")
 	
 	result = _result
 	response_code = _response_code
 	headers = _headers
 	body = _body
+	
+	print("_http_request_completed")
+	
+	http_completed.emit()

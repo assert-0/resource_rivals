@@ -54,8 +54,6 @@ transform = Transform3D(1, -8.88178e-16, -3.88235e-23, 0, -4.37114e-08, 1, 0, -1
 [node name="Camera3D" type="Camera3D" parent="Marker3D"]
 transform = Transform3D(1, 8.27651e-16, -4.59755e-16, -3.02639e-17, 0.965926, -0.258819, 2.29877e-16, 0.258819, 0.965926, -1.77636e-15, -2.00001, 2)
 
-[node name="HTTPRequest" type="HTTPRequest" parent="."]
-
 [node name="UserInterface" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
