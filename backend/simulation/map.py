@@ -1,12 +1,13 @@
 from typing import List, Optional, Set, Collection, Dict
 
+from pydantic import BaseModel
+
 from consts import TEAMS_NEUTRAL_ID
 from entities.entity import Entity
 from utils.model_serde import ModelSerde
-from utils.observer import Observable, ObserverEvent
 
 
-class Map(Observable):
+class Map(BaseModel):
     sectors: List[List[List[Entity]]]
     entities: Dict[str, Entity]
     influence: List[List[str]]  # 2D array of team ids
@@ -16,18 +17,12 @@ class Map(Observable):
 
         self.entities[entity.id] = entity
         self.sectors[entity.position.x][entity.position.y].append(entity)
-        self.notify_observers(  # type: ignore
-            entity, event=ObserverEvent.ADDED
-        )
 
     def remove_entity(self, entity: Entity):
         self.expect_entity_by_id(entity.id)
 
         del self.entities[entity.id]
         self.sectors[entity.position.x][entity.position.y].remove(entity)
-        self.notify_observers(  # type: ignore
-            entity, event=ObserverEvent.REMOVED
-        )
 
     def update_entity(self, entity: Entity):
         old_entity = self.expect_entity_by_id(entity.id)
@@ -42,9 +37,6 @@ class Map(Observable):
 
         self.entities[entity.id] = entity
         self.sectors[entity.position.x][entity.position.y].append(entity)
-        self.notify_observers(  # type: ignore
-            entity, event=ObserverEvent.UPDATED
-        )
 
     def get_entities_at_position(self, x: int, y: int) -> List[Entity]:
         return [entity.model_copy(deep=True) for entity in self.sectors[x][y]]
