@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from fastapi import APIRouter, Request, Response
 
+from consts import MAP_DIR
 from server import server
 from simulation.actions.response import Response as GenericResponse
 from simulation.actions.game.create import (
@@ -36,11 +39,30 @@ api_router = APIRouter(prefix="/api/v1")
 async def create_game(
         request: Request, response: Response
 ) -> GameCreateResponse:
-    request = await request.json()
-    parsed_request = GameCreateRequest(**request)
+    try:
+        request = await request.json()
+        parsed_request = GameCreateRequest(**request)
+    except Exception as e:
+        response.status_code = 400
+        return GameCreateResponse(
+            error=f"Invalid parameters ({e})", game=None
+        )
 
     try:
-        created_game = server.create_game(map_path=parsed_request.mapName)
+        base_map_path = f"{MAP_DIR}/{parsed_request.mapName}"
+        for extension in ["json", "yaml"]:
+            map_path = f"{base_map_path}.{extension}"
+            if Path(map_path).exists():
+                break
+
+        if not Path(map_path).exists():
+            return GameCreateResponse(
+                error=f"Map {parsed_request.mapName} not found", game=None
+            )
+
+        created_game = server.create_game(
+            map_path=map_path
+        )
     except ValueError as e:
         response.status_code = 400
         return GameCreateResponse(error=str(e), game=None)
@@ -70,16 +92,33 @@ async def delete_game(game_id: str, response: Response) -> GenericResponse:
     return GenericResponse()
 
 
+@api_router.post("/game/{game_id}/start", response_model=None)
+async def start_game(game_id: str, response: Response) -> GenericResponse:
+    try:
+        server.get_game(game_id).start()
+    except ValueError as e:
+        response.status_code = 400
+        return GenericResponse(error=str(e))
+
+    return GenericResponse()
+
+
 @api_router.post("/game/{game_id}/team/", response_model=TeamCreateResponse)
 async def create_team(
         game_id: str, request: Request, response: Response
 ) -> TeamCreateResponse:
-    request = await request.json()
-    parsed_request = TeamCreateRequest(**request)
+    try:
+        request = await request.json()
+        parsed_request = TeamCreateRequest(**request)
+    except Exception as e:
+        response.status_code = 400
+        return TeamCreateResponse(
+            error=f"Invalid parameters ({e})", team=None
+        )
 
     try:
         created_team = server.get_game(game_id).register_team(
-            name=parsed_request.teamName
+            name=parsed_request.name
         )
     except ValueError as e:
         response.status_code = 400
@@ -143,8 +182,13 @@ async def end_turn(
 async def create_building(
         game_id: str, team_id: str, unit_id: str, request: Request
 ) -> BuildCreateResponse:
-    request = await request.json()
-    parsed_request = BuildCreateRequest(**request, teamId=team_id)
+    try:
+        request = await request.json()
+        parsed_request = BuildCreateRequest(**request, teamId=team_id)
+    except Exception as e:
+        return BuildCreateResponse(
+            error=f"Invalid parameters ({e})", building=None
+        )
 
     try:
         game = server.get_game(game_id)
@@ -187,8 +231,11 @@ async def get_available_buildings(
 async def move_unit(
         game_id: str, team_id: str, unit_id: str, request: Request
 ) -> GenericResponse:
-    request = await request.json()
-    parsed_request = MoveCreateRequest(**request, teamId=team_id)
+    try:
+        request = await request.json()
+        parsed_request = MoveCreateRequest(**request, teamId=team_id)
+    except Exception as e:
+        return GenericResponse(error=f"Invalid parameters ({e})")
 
     try:
         game = server.get_game(game_id)

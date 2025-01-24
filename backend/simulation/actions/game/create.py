@@ -1,7 +1,5 @@
 from typing import Optional
 
-from pydantic import BaseModel
-
 from simulation.actions.action import ConcreteAction
 from simulation.actions.game.game_action import GameAction
 from simulation.actions.response import Response

@@ -5,7 +5,7 @@ from entities.dynamic.buildings.resource_collectors.farm import Farm
 from entities.dynamic.buildings.resource_collectors.miner import Miner
 from entities.dynamic.buildings.resource_collectors.sawmill import Sawmill
 from entities.dynamic.units.unit import Unit
-from entities.entity import ConcreteEntity, Entity
+from entities.entity import ConcreteEntity
 from entities.static.resources.food import Food
 from entities.static.resources.mineral import Mineral
 from entities.static.resources.wood import Wood

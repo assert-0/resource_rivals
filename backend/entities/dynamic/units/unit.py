@@ -1,7 +1,5 @@
 from typing import List, Set
 
-from pydantic import Field
-
 from consts import UNITS_CONFIG
 from entities.entity import Entity
 from entities.static.obstacles.obstacle import Obstacle

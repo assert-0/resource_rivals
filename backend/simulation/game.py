@@ -1,4 +1,4 @@
-from typing import Dict, Set, Any
+from typing import Dict, Set
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -39,11 +39,17 @@ class Game(BaseModel):
 
         self._mark_capitals()
 
+        self._on_turn_start()
+
     def end_turn(self) -> None:
         if winning_team := self._has_ended():
             self.stop(winning_team)
 
+        self._on_turn_end()
+
         self.activeTeamId = self._get_next_team_id()
+
+        self._on_turn_start()
 
     def stop(self, winning_team_id: str = TEAMS_NEUTRAL_ID) -> None:
         self.state = GameStates.FINISHED
@@ -83,3 +89,11 @@ class Game(BaseModel):
             return undefeated_teams[0]
 
         return ""
+
+    def _on_turn_start(self):
+        for entity in self.map.get_entities_by_team(self.activeTeamId):
+            entity.on_turn_start(self)
+
+    def _on_turn_end(self):
+        for entity in self.map.get_entities_by_team(self.activeTeamId):
+            entity.on_turn_end(self)

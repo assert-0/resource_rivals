@@ -1,4 +1,3 @@
-from typing import List, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, ConfigDict
@@ -55,6 +54,9 @@ class Entity(BaseModel):
         self.__dict__.update(actual_cls_instance.__dict__)
 
     model_config = ConfigDict(extra="allow")
+
+    def __hash__(self):
+        return hash(self.id)
 
 
 class ConcreteEntity(Entity):

@@ -1,6 +1,3 @@
-from typing import Type, Optional
-
-from entities.dynamic.units.unit import Unit
 from entities.entity import Entity
 
 

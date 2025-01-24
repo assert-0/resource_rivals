@@ -79,6 +79,14 @@ class Map(BaseModel):
             if entity.teamId == team_id
         }
 
+    @property
+    def width(self) -> int:
+        return len(self.sectors[0])
+
+    @property
+    def height(self) -> int:
+        return len(self.sectors)
+
     @staticmethod
     def from_entities(entities: Collection[Entity], w: int, h: int) -> 'Map':
         sectors: List[List[List[Entity]]] = [
@@ -105,7 +113,12 @@ class Map(BaseModel):
 
     def _recalculate_influence(self) -> None:
         for entity in self.entities.values():
-            influence_cloud = entity.calculate_influence()
+            if getattr(entity, "calculate_influence", None) is None:
+                continue
+
+            influence_cloud = entity.calculate_influence(
+                self.sectors, self.influence
+            )
             for position in influence_cloud:
                 x, y = position
                 self.influence[x][y] = entity.teamId

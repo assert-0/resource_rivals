@@ -1,7 +1,3 @@
-from typing import List
-
-from pydantic import Field
-
 from entities.dynamic.buildings.building import Building
 from entities.dynamic.units.worker import Worker
 from entities.entity import ConcreteEntity
