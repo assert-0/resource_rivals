@@ -182,12 +182,14 @@ async def end_turn(
     response_model=BuildCreateResponse
 )
 async def create_building(
-        game_id: str, team_id: str, unit_id: str, request: Request
+        game_id: str, team_id: str, unit_id: str,
+        request: Request, response: Response
 ) -> BuildCreateResponse:
     try:
         request = await request.json()
         parsed_request = BuildCreateRequest(**request, teamId=team_id)
     except Exception as e:
+        response.status_code = 400
         return BuildCreateResponse(
             error=f"Invalid parameters ({e})", building=None
         )
@@ -204,6 +206,7 @@ async def create_building(
         )
         game.teams[team_id].recalculate_visible_area(game.map)
     except ValueError as e:
+        response.status_code = 400
         return BuildCreateResponse(error=str(e), building=None)
 
     return BuildCreateResponse(building=building)
@@ -240,12 +243,14 @@ async def get_available_buildings(
     response_model=None
 )
 async def move_unit(
-        game_id: str, team_id: str, unit_id: str, request: Request
+        game_id: str, team_id: str, unit_id: str,
+        request: Request, response: Response
 ) -> GenericResponse:
     try:
         request = await request.json()
         parsed_request = MoveCreateRequest(**request, teamId=team_id)
     except Exception as e:
+        response.status_code = 400
         return GenericResponse(error=f"Invalid parameters ({e})")
 
     try:
@@ -256,12 +261,15 @@ async def move_unit(
                 f"Only units can move/attack. "
                 f"Selected entity type: {unit.type}"
             )
+        if unit.teamId != team_id:
+            raise ValueError("Unit does not belong to the team")
         if unit.id in game.movedUnits:
             raise ValueError("Unit has already moved this turn")
         unit.act(parsed_request.targetPosition, game.map)
         game.movedUnits.add(unit.id)
         game.teams[team_id].recalculate_visible_area(game.map)
     except ValueError as e:
+        response.status_code = 400
         return GenericResponse(error=str(e))
 
     return GenericResponse()
@@ -272,20 +280,23 @@ async def move_unit(
     response_model=UnitGetReachableSectorsResponse
 )
 async def get_reachable_sectors(
-        game_id: str, team_id: str, unit_id: str
+        game_id: str, team_id: str, unit_id: str, response: Response
 ) -> UnitGetReachableSectorsResponse:
     try:
         game = server.get_game(game_id)
         unit = game.map.entities[unit_id]
-        if unit.id in game.movedUnits:
-            raise ValueError("Unit has already moved this turn")
         if not isinstance(unit, Unit):
             raise ValueError(
                 f"Only units can move/attack. "
                 f"Selected entity type: {unit.type}"
             )
+        if unit.teamId != team_id:
+            raise ValueError("Unit does not belong to the team")
+        if unit.id in game.movedUnits:
+            raise ValueError("Unit has already moved this turn")
         reachable_sectors = unit.calculate_reachable_sectors(game.map.sectors)
     except ValueError as e:
+        response.status_code = 400
         return UnitGetReachableSectorsResponse(
             error=str(e), sectors=None
         )
