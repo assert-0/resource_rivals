@@ -4,7 +4,10 @@ from pydantic import BaseModel
 
 from consts import TEAMS_NEUTRAL_ID
 from entities.entity import Entity
+from utils.logger import get_logger
 from utils.model_serde import ModelSerde
+
+logger = get_logger("map")
 
 
 class Map(BaseModel):
@@ -16,33 +19,35 @@ class Map(BaseModel):
         entity = entity.model_copy(deep=True)
 
         self.entities[entity.id] = entity
-        self.sectors[entity.position.x][entity.position.y].append(entity)
+        self.sectors[entity.position.y][entity.position.x].append(entity)
         self._recalculate_influence()
 
     def remove_entity(self, entity: Entity):
         self.expect_entity_by_id(entity.id)
 
         del self.entities[entity.id]
-        self.sectors[entity.position.x][entity.position.y].remove(entity)
+        self.sectors[entity.position.y][entity.position.x].remove(entity)
         self._recalculate_influence()
 
     def update_entity(self, entity: Entity):
+        logger.debug(f"Updating entity: {entity}")
         old_entity = self.expect_entity_by_id(entity.id)
         entity = entity.model_copy(deep=True)
 
         if old_entity == entity:
+            logger.debug("Entity is the same, skipping update")
             return
 
-        self.sectors[old_entity.position.x][old_entity.position.y].remove(
+        self.sectors[old_entity.position.y][old_entity.position.x].remove(
             old_entity
         )
 
         self.entities[entity.id] = entity
-        self.sectors[entity.position.x][entity.position.y].append(entity)
+        self.sectors[entity.position.y][entity.position.x].append(entity)
         self._recalculate_influence()
 
     def get_entities_at_position(self, x: int, y: int) -> List[Entity]:
-        return [entity.model_copy(deep=True) for entity in self.sectors[x][y]]
+        return [entity.model_copy(deep=True) for entity in self.sectors[y][x]]
 
     def get_entity_by_id(self, _id: str) -> Optional[Entity]:
         entity = self.entities.get(_id, None)
@@ -90,14 +95,14 @@ class Map(BaseModel):
     @staticmethod
     def from_entities(entities: Collection[Entity], w: int, h: int) -> 'Map':
         sectors: List[List[List[Entity]]] = [
-            [[] for _ in range(h)] for _ in range(w)
+            [[] for _ in range(w)] for _ in range(h)
         ]
         influence: List[List[str]] = [
-            [TEAMS_NEUTRAL_ID for _ in range(h)] for _ in range(w)
+            [TEAMS_NEUTRAL_ID for _ in range(w)] for _ in range(h)
         ]
 
         for entity in entities:
-            sectors[entity.position.x][entity.position.y].append(entity)
+            sectors[entity.position.y][entity.position.x].append(entity)
 
         entities_map = {entity.id: entity for entity in entities}
 
@@ -121,4 +126,4 @@ class Map(BaseModel):
             )
             for position in influence_cloud:
                 x, y = position
-                self.influence[x][y] = entity.teamId
+                self.influence[y][x] = entity.teamId

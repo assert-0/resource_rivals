@@ -218,7 +218,7 @@ async def get_available_buildings(
 ) -> UnitGetAvailableBuildingsResponse:
     try:
         game = server.get_game(game_id)
-        unit = game.map.entities[unit_id]
+        unit = game.map.get_entity_by_id(unit_id)
         if not isinstance(unit, Worker):
             raise ValueError(
                 f"Only workers can build. Selected unit type: {unit.type}"
@@ -250,7 +250,7 @@ async def move_unit(
 
     try:
         game = server.get_game(game_id)
-        unit = game.map.entities[unit_id]
+        unit = game.map.get_entity_by_id(unit_id)
         if not isinstance(unit, Unit):
             raise ValueError(
                 f"Only units can move/attack. "
