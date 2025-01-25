@@ -92,6 +92,20 @@ BUILDING_COSTS = {
     "Capital": [0, 0, 0],
 }
 
+BUILDING_INFLUENCE_SIZE = {
+    "Sawmill": 1,
+    "Miner": 1,
+    "Farm": 1,
+    "UnitUpgrader": 0,
+    "Barracks": 0,
+    "WorkerGenerator": 0,
+    "SoldierGenerator": 0,
+    "RangedGenerator": 0,
+    "TankGenerator": 0,
+    "ScoutGenerator": 0,
+    "Capital": 2,
+}
+
 REGISTRY_SEARCH_PATHS = [
     "entities/dynamic", "entities/static", "simulation/actions"
 ]

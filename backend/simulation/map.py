@@ -122,8 +122,8 @@ class Map(BaseModel):
                 continue
 
             influence_cloud = entity.calculate_influence(  # type: ignore
-                self.sectors, self.influence
+                self.sectors
             )
             for position in influence_cloud:
-                x, y = position
+                x, y = position.x, position.y
                 self.influence[y][x] = entity.teamId

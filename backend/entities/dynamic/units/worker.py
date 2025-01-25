@@ -47,7 +47,7 @@ class Worker(Unit, ConcreteEntity):
                 )
 
         if (
-                game.map.influence[self.position.x][self.position.y]
+                game.map.influence[self.position.y][self.position.x]
                 == self.teamId
                 and len(current_sector) == 1
         ):

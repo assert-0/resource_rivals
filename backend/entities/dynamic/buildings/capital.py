@@ -1,6 +1,9 @@
+from typing import List
+
 from entities.dynamic.buildings.building import Building
 from entities.dynamic.units.worker import Worker
 from entities.entity import ConcreteEntity
+from utils.math import Point
 
 
 class Capital(Building, ConcreteEntity):

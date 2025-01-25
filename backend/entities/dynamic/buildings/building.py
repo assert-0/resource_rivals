@@ -1,6 +1,6 @@
-from typing import List, Type, Optional
+from typing import List, Type, Optional, Set
 
-from consts import BUILDING_COSTS
+from consts import BUILDING_COSTS, BUILDING_INFLUENCE_SIZE
 from entities.dynamic.units.unit import Unit
 from entities.entity import Entity
 from utils.math import Point
@@ -15,10 +15,19 @@ class Building(Entity):
 
     def calculate_influence(
             self,
-            sectors: List[List[List['Entity']]],
-            influence: List[List[str]],
-    ) -> List[Point]:
-        return []
+            sectors: List[List[List['Entity']]]
+    ) -> Set[Point]:
+        influence_cloud = set()
+        influence_size = BUILDING_INFLUENCE_SIZE[self.__class__.__name__]
+        for y in range(len(sectors)):
+            for x in range(len(sectors[y])):
+                if (
+                        abs(self.position.y - y) <= influence_size
+                        and abs(self.position.x - x) <= influence_size
+                ):
+                    influence_cloud.add(Point(x, y))
+
+        return influence_cloud
 
     def on_turn_start(self, game) -> None:
         super().on_turn_start(game)
