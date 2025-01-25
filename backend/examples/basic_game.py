@@ -105,11 +105,9 @@ def perform_turn(game_id: str, team_id: str):
 
     get_reachable_sectors_url = (
         f"{api_prefix}/game/{game_id}/team/{team_id}/"
-        f"unit/{selected_worker_id}/reachable-sectors"
+        f"unit/{selected_worker_id}/move/reachable-sectors"
     )
-    response = requests.get(
-        get_reachable_sectors_url.format(selected_worker_id)
-    )
+    response = requests.get(get_reachable_sectors_url)
     if response.status_code != 200:
         raise ValueError(f"Error getting reachable sectors: {response.json()}")
 

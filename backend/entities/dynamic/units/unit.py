@@ -3,7 +3,10 @@ from typing import List, Set
 from consts import UNITS_CONFIG
 from entities.entity import Entity
 from entities.static.obstacles.obstacle import Obstacle
+from utils.logger import get_logger
 from utils.math import Point
+
+logger = get_logger("unit")
 
 
 class Unit(Entity):
@@ -62,43 +65,44 @@ class Unit(Entity):
         _map.update_entity(self)
 
     def calculate_reachable_sectors(
-            self, game
+            self, sectors: List[List[List[Entity]]]
     ) -> List[Point]:
         movable_sectors = []
         attackable_sectors = []
 
-        sectors = game.map.sectors
+        logger.debug(f"Calculating reachable sectors for {self}")
+        logger.debug(f"Current position: {self.position}")
 
-        for i, row in enumerate(sectors):
-            for j, sector in enumerate(row):
+        for y, row in enumerate(sectors):
+            for x, sector in enumerate(row):
                 if (
-                        self._check_in_movement_range(Point(i, j))
-                        and self._sector_free(sectors[i][j])
+                        self._check_in_movement_range(Point(x, y))
+                        and self._sector_free(sectors[y][x])
                 ):
-                    movable_sectors.append(Point(i, j))
+                    movable_sectors.append(Point(x, y))
 
-        for i, row in enumerate(sectors):
-            for j, sector in enumerate(row):
+        for y, row in enumerate(sectors):
+            for x, sector in enumerate(row):
                 if (
-                        self._check_in_attack_range(Point(i, j))
-                        and self._contains_enemy_unit(sectors[i][j])
+                        self._check_in_attack_range(Point(x, y))
+                        and self._contains_enemy_unit(sectors[y][x])
                 ):
-                    attackable_sectors.append(Point(i, j))
+                    attackable_sectors.append(Point(x, y))
 
         return movable_sectors + attackable_sectors
 
     def calculate_visible_area(self) -> Set[Point]:
         visible_sectors = set()
 
-        for i in range(
+        for x in range(
                 self.position.x - self.attackRange,
                 self.position.x + self.attackRange + 1
         ):
-            for j in range(
+            for y in range(
                     self.position.y - self.attackRange,
                     self.position.y + self.attackRange + 1
             ):
-                visible_sectors.add(Point(i, j))
+                visible_sectors.add(Point(x, y))
 
         return visible_sectors
 

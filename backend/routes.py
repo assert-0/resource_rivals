@@ -279,7 +279,7 @@ async def get_reachable_sectors(
                 f"Only units can move/attack. "
                 f"Selected entity type: {unit.type}"
             )
-        reachable_sectors = unit.calculate_reachable_sectors(game)
+        reachable_sectors = unit.calculate_reachable_sectors(game.map.sectors)
     except ValueError as e:
         return UnitGetReachableSectorsResponse(
             error=str(e), sectors=None
