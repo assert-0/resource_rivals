@@ -48,7 +48,7 @@ class Building(Entity):
         return BUILDING_COSTS[self.__class__.__name__]
 
     def _can_generate_unit(self, game) -> bool:
-        current_sector = game.map.sectors[self.position.x][self.position.y]
+        current_sector = game.map.sectors[self.position.y][self.position.x]
         current_population = (
             game.teams[self.teamId].get_current_population(game.map)
         )
@@ -56,7 +56,7 @@ class Building(Entity):
         return len(current_sector) == 1 and current_population < max_population
 
     def _contains_unit(self, game, unit_type: Type[Unit]) -> Optional[Unit]:
-        for entity in game.map.sectors[self.position.x][self.position.y]:
+        for entity in game.map.sectors[self.position.y][self.position.x]:
             if isinstance(entity, unit_type):
                 return entity
         return None
@@ -66,7 +66,7 @@ class Building(Entity):
             game.map.remove_entity(self)
 
     def _is_conquered(self, game) -> bool:
-        current_sector = game.map.sectors[self.position.x][self.position.y]
+        current_sector = game.map.sectors[self.position.y][self.position.x]
         for entity in current_sector:
             if isinstance(entity, Unit) and entity.teamId != self.teamId:
                 return True

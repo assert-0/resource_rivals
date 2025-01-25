@@ -38,7 +38,7 @@ class Worker(Unit, ConcreteEntity):
         resource_buildings = []
         other_buildings = []
 
-        current_sector = game.map.sectors[self.position.x][self.position.y]
+        current_sector = game.map.sectors[self.position.y][self.position.x]
 
         for entity in current_sector:
             if entity.__class__ in RESOURCE_TO_COLLECTOR_MAPPING:

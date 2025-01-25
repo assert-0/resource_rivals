@@ -256,7 +256,10 @@ async def move_unit(
                 f"Only units can move/attack. "
                 f"Selected entity type: {unit.type}"
             )
+        if unit.id in game.movedUnits:
+            raise ValueError("Unit has already moved this turn")
         unit.act(parsed_request.targetPosition, game.map)
+        game.movedUnits.append(unit.id)
         game.teams[team_id].recalculate_visible_area(game.map)
     except ValueError as e:
         return GenericResponse(error=str(e))

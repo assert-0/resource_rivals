@@ -21,6 +21,7 @@ class Game(BaseModel):
     history: History = History()
     state: GameStates = GameStates.BEFORE_START
     activeTeamId: str = TEAMS_NEUTRAL_ID
+    movedUnits: Set[str] = Field(default_factory=set)
     winningTeamId: str = TEAMS_NEUTRAL_ID
 
     @staticmethod
@@ -64,6 +65,8 @@ class Game(BaseModel):
 
         logger.debug("Executing on_turn_end")
         self._on_turn_end()
+
+        self.movedUnits = set()
 
         self.activeTeamId = self._get_next_team_id()
         logger.info(f"Starting turn for team: {self.activeTeamId}")
