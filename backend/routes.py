@@ -277,6 +277,8 @@ async def get_reachable_sectors(
     try:
         game = server.get_game(game_id)
         unit = game.map.entities[unit_id]
+        if unit.id in game.movedUnits:
+            raise ValueError("Unit has already moved this turn")
         if not isinstance(unit, Unit):
             raise ValueError(
                 f"Only units can move/attack. "
