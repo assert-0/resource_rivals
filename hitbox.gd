@@ -14,9 +14,9 @@ func _ready() -> void:
 #
 var location: Vector2i
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+# # Called every frame. 'delta' is the elapsed time since the previous frame.
+# func _process(delta: float) -> void:
+# 	pass
 
 #func on_input_event(camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
 	#if (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
@@ -28,7 +28,7 @@ func _process(delta: float) -> void:
 		#main.selectedCell(location)
 		#queue_free()
 
-func _on_input_event(camera: Node, event: InputEvent, event_position: Vector3, normal: Vector3, shape_idx: int) -> void:
+func _on_input_event(_camera: Node, event: InputEvent, _event_position: Vector3, _normal: Vector3, _shape_idx: int) -> void:
 	#var root = get_tree().get_root()
 	#print(root.get_children()[0].get_children())
 	#var main = root.get_children()[0]

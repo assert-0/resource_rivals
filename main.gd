@@ -18,7 +18,7 @@ var movable = Color("blue", 0.3)
 
 var testing = true
 
-var internet_enabled = false
+var internet_enabled = true
 
 var url: String = "http://127.0.0.1:8000" + "/api/v1"
 
@@ -42,6 +42,14 @@ var game: Game
 var TEAMS_NEUTRAL_ID = "neutral"
 
 var label: Node
+
+var map_name: String = "example"
+
+var team_names: Array[String] = ["Team 1", "Team 2"]
+
+var buildingCallable = Callable(self, "buildingSelected")
+
+# var active_team_id: String
 
 enum GameStates {
 	BEFORE_START,
@@ -108,7 +116,7 @@ class Game:
 		activeTeamId = data["activeTeamId"]
 		winningTeamId = data["winningTeamId"]
 		
-		if true:
+		if false:
 			map = Map.new()
 			map.setFromJSON(JSON.parse_string('{"sectors":[[[{"id":"1c83c71f-f051-40ba-b591-183e040addd6","position":{"x":0,"y":0},"teamId":"34214631246321463123","type":"Capital","namespace":"buildings"}, {"id":"78e34539-dc79-41c0-99c1-591294f6a9bc","position":{"x":0,"y":0},"teamId":"4532164312","type":"Worker","namespace":"units","health":5,"armor":0,"damage":0,"movementRange":1,"attackRange":0}],[],[],[{"id":"58eb376a-ed8b-4084-be05-0c4c646e23c3","position":{"x":0,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"eda37701-ab8c-4ffc-8365-4952db04768b","position":{"x":1,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"eb19e8af-97c9-447c-8c20-ad44c578c254","position":{"x":2,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b","position":{"x":3,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b","position":{"x":4,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"af948946-2b96-4aca-91a9-867388fe1164","position":{"x":5,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"1d2ce34c-a969-41e1-a284-d9b6b439a598","position":{"x":6,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[],[],[],[],[{"id":"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf","position":{"x":7,"y":7},"teamId":"91463216425320541230","type":"Capital","namespace":"buildings"}]]],"entities":{"1c83c71f-f051-40ba-b591-183e040addd6":{"id":"1c83c71f-f051-40ba-b591-183e040addd6","position":{"x":0,"y":0},"teamId":"34214631246321463123","type":"Capital","namespace":"buildings"},"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf":{"id":"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf","position":{"x":7,"y":7},"teamId":"91463216425320541230","type":"Capital","namespace":"buildings"},"58eb376a-ed8b-4084-be05-0c4c646e23c3":{"id":"58eb376a-ed8b-4084-be05-0c4c646e23c3","position":{"x":0,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"eda37701-ab8c-4ffc-8365-4952db04768b":{"id":"eda37701-ab8c-4ffc-8365-4952db04768b","position":{"x":1,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"eb19e8af-97c9-447c-8c20-ad44c578c254":{"id":"eb19e8af-97c9-447c-8c20-ad44c578c254","position":{"x":2,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b":{"id":"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b","position":{"x":3,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b":{"id":"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b","position":{"x":4,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"af948946-2b96-4aca-91a9-867388fe1164":{"id":"af948946-2b96-4aca-91a9-867388fe1164","position":{"x":5,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"1d2ce34c-a969-41e1-a284-d9b6b439a598":{"id":"1d2ce34c-a969-41e1-a284-d9b6b439a598","position":{"x":6,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}},"influence":[["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"]]}'))
 		
@@ -281,6 +289,7 @@ var Mineral_preload
 var basic_unit_preload
 
 func prepareUnits():
+	#print("prepareUnits")
 	for type in unitsAllInfo()["types"]:
 		units[type] = {"free": [], "used": []}
 		
@@ -291,21 +300,33 @@ func getFreeUnit(nstype: String) -> Node:
 		dict["used"].append(unit)
 		return unit
 	else:
+		#print("using old unit " + nstype)
 		var unit = dict["free"].pop_back()
+		dict["used"].append(unit)
 		unit.set_visible(true)
 		return unit
 
-func freeUnit(entity: Entity):
-	var nstype = entity.ns + "/" + entity.type
-	var dict = units[nstype]
-	var pos = dict["used"].find(entity.unit)
-	if pos == -1:
-		return
-	var unit = dict["used"][pos]
-	unit.set_visible(false)
-	dict["free"].append(unit)
+#func freeUnit(entity):
+	#var nstype = entity.ns + "/" + entity.type
+	#var dict = units[nstype]
+	#var pos = dict["used"].find(entity.unit)
+	#
+	#print("used" + str(dict["used"]))
+	#print(entity.unit)
+	##push_error("trying to free " + entity.unit.name)
+	#
+	#if pos == -1:
+		#return
+	#var unit = dict["used"][pos]
+	#unit.set_visible(false)
+	#dict["used"].remove_at[pos]
+	#dict["free"].append(unit)
+	#
+	#print("freed " + unit.id)
 	
 func makeNewUnit(nstype) -> Node:
+	#print("making new unit " + nstype)
+	
 	field = get_node("Field")
 	var entities = field.get_node("Entities")
 	
@@ -336,12 +357,52 @@ func makeNewUnit(nstype) -> Node:
 	entities.add_child(instance)
 	return instance
 	
-func freeAllUnitsFromEntities(entities):
-	for key in entities.keys():
-		var entity = entities[key]
-		freeUnit(entity)
+func freeAllUnitsFromEntities():
+	#for nstype in unitsAllInfo()["types"]:
+		#for entity in units[nstype]["used"]:
+			#freeUnit(entity)
+			
+	#for key in entities.keys():
+		#var entity = entities[key]
+		#print(key)
+		#freeUnit(entity)
+		
+	for nstype in unitsAllInfo()["types"]:
+		#print(nstype)
+		#print(units[nstype]["used"])
+		for i in len(units[nstype]["used"]):
+			#print("clear clear " + str(i))
+			units[nstype]["free"].append(units[nstype]["used"][i])
+			#print(units[nstype]["free"])
+		#print("pre")
+		#print(units[nstype]["free"])
+		
+		units[nstype]["used"].clear()
+		#print("post")
+		#print(units[nstype]["free"])
+		
+	#for nstype in unitsAllInfo()["types"]:
+		#for i in len(units[nstype]["free"]):
+			#print("clear huh " + str(i))
+		
+	#var nstype = entity.ns + "/" + entity.type
+	#var dict = units[nstype]
+	#var pos = dict["used"].find(entity.unit)
+	#
+	#print("used" + str(dict["used"]))
+	#print(entity.unit)
+	##push_error("trying to free " + entity.unit.name)
+	#
+	#if pos == -1:
+		#return
+	#var unit = dict["used"][pos]
+	#unit.set_visible(false)
+	#dict["used"].remove_at[pos]
+	#dict["free"].append(unit)
+	#
+	#print("freed " + unit.id)
 	
-func loadUnits(entities):
+func showUnits(entities):
 	for key in entities.keys():
 		var entity = entities[key]
 		#print(entity)
@@ -390,27 +451,38 @@ var building_types = [
 	"Miner",
 ]
 
-func getSectorsAllEntities():
+func getSectorsAllEntities(sectors):
 	var entities = {}
 	for i in range(field_size):
 		for j in range(field_size):
-			var sector = game.map.sectors[i][j]
-			for data in sector:
-				var entity = Entity.new()
-				entity.setFromJSON(data)
-				entities[entity["id"]] = entity
+			# var sector = game.map.sectors[i][j]
+			var sector = sectors[i][j]
+			#print(sector)
+			if sector != null:
+				for data in sector:
+					var entity = Entity.new()
+					entity.setFromJSON(data)
+					entities[entity["id"]] = entity
 	return entities
 
-func resetMap(data):
-	clearMap()
-	loadSectors(data)
-	loadUnits(getSectorsAllEntities())
+# func updateMap(data):
+#     clearMap()
+#     updateGameSectors(data)
+
+func showUnitsFromData(data):
+	showUnits(getSectorsAllEntities(data))
 
 func clearMap():
-	freeAllUnitsFromEntities(game.map.entities)
+	#print("clearing " + str(game.map.entities))
+	#freeAllUnitsFromEntities(game.map.entities)
+	#print("clearing all")
+	freeAllUnitsFromEntities()
+
+# func updateGame(data):
+#     game = game.setFromJSON(data)
 	
-func loadSectors(data):
-	game.map.sectors = data
+# func updateGameSectors(data):
+#     game.map.sectors = data
 
 func _ready():
 	http_request = HTTPRequest.new()
@@ -428,7 +500,10 @@ func _ready():
 	
 	for i in range(len(buttons)):
 		if i != 0:
-			buttons[i].text = button_text[i-1]	
+			buttons[i].text = button_text[i-1] 
+			buttons[i].pressed.connect(await self.buildingSelected.bind(buttons[i].text))
+			#buttons[i].connect("pressed", await buildingSelected(buttons[i].text))
+			#self.buildingCallable.connect(buttons[i].pressed)
 		
 	building_select.set_visible(false)
 	
@@ -451,6 +526,11 @@ func _ready():
 	
 	var scale_xyz = 8.0/field_size
 	scale = Vector3(scale_xyz,scale_xyz,scale_xyz)
+	
+	for i in range(field_size):
+			availible_moves.append([]) 
+			for j in range(field_size):
+				availible_moves[i].append(null)
 	
 	for i in range(field_size):
 		for j in range(field_size):
@@ -484,22 +564,36 @@ func _ready():
 	clearActions()
 	
 	prepareUnits()
+
+	await createGame(map_name)
+
+	await createTeam(game.id, team_names[0])
+
+	await createTeam(game.id, team_names[1])
 	
-	await startGame()
+	await start_game(game.id)
 	#
 	#print(json.data.keys())
+
+	await get_game_info(game.id)
+
+	# active_team_id = game["activeTeamId"]
+
+	# show map and let player do moves and end turn
+
+	await updateMap()
 	
-	await getVisibleMap()
+	# await getVisibleMap()
 	
-	if internet_enabled:
-		#print(json.data.keys())
+	# if internet_enabled:
+	#     #print(json.data.keys())
 		
-		var map_data = json.data["sectors"]
+	#     var map_data = json.data["sectors"]
 		
-		resetMap(map_data)
+	#     updateMap(map_data)
 	
-	else:
-		resetMap(game.map.sectors)
+	# else:
+	#     updateMap(game.map.sectors)
 	
 	#var gltf_document_load = GLTFDocument.new()
 	#var gltf_state_load = GLTFState.new()
@@ -510,6 +604,26 @@ func _ready():
 		#add_child(gltf_scene_root_node)
 	#else:
 		#push_error("Couldn't load glTF scene (error code: %s)." % error_string(error))
+
+func updateMap():
+	#print("updating map")
+	
+	clearMap()
+	
+	#print("cleared map")
+
+	await getVisibleMap()
+
+	var visible_map_sectors
+
+	if internet_enabled:
+		visible_map_sectors = json.data["sectors"]
+	else:
+		visible_map_sectors = JSON.parse_string('{"sectors":[[[{"id":"1c83c71f-f051-40ba-b591-183e040addd6","position":{"x":0,"y":0},"teamId":"34214631246321463123","type":"Capital","namespace":"buildings"}, {"id":"78e34539-dc79-41c0-99c1-591294f6a9bc","position":{"x":0,"y":0},"teamId":"4532164312","type":"Worker","namespace":"units","health":5,"armor":0,"damage":0,"movementRange":1,"attackRange":0}],[],[],[{"id":"58eb376a-ed8b-4084-be05-0c4c646e23c3","position":{"x":0,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"eda37701-ab8c-4ffc-8365-4952db04768b","position":{"x":1,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"eb19e8af-97c9-447c-8c20-ad44c578c254","position":{"x":2,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b","position":{"x":3,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b","position":{"x":4,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"af948946-2b96-4aca-91a9-867388fe1164","position":{"x":5,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"1d2ce34c-a969-41e1-a284-d9b6b439a598","position":{"x":6,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[],[],[],[],[{"id":"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf","position":{"x":7,"y":7},"teamId":"91463216425320541230","type":"Capital","namespace":"buildings"}]]],"entities":{"1c83c71f-f051-40ba-b591-183e040addd6":{"id":"1c83c71f-f051-40ba-b591-183e040addd6","position":{"x":0,"y":0},"teamId":"34214631246321463123","type":"Capital","namespace":"buildings"},"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf":{"id":"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf","position":{"x":7,"y":7},"teamId":"91463216425320541230","type":"Capital","namespace":"buildings"},"58eb376a-ed8b-4084-be05-0c4c646e23c3":{"id":"58eb376a-ed8b-4084-be05-0c4c646e23c3","position":{"x":0,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"eda37701-ab8c-4ffc-8365-4952db04768b":{"id":"eda37701-ab8c-4ffc-8365-4952db04768b","position":{"x":1,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"eb19e8af-97c9-447c-8c20-ad44c578c254":{"id":"eb19e8af-97c9-447c-8c20-ad44c578c254","position":{"x":2,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b":{"id":"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b","position":{"x":3,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b":{"id":"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b","position":{"x":4,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"af948946-2b96-4aca-91a9-867388fe1164":{"id":"af948946-2b96-4aca-91a9-867388fe1164","position":{"x":5,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"1d2ce34c-a969-41e1-a284-d9b6b439a598":{"id":"1d2ce34c-a969-41e1-a284-d9b6b439a598","position":{"x":6,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}},"influence":[["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"]]}').data["sectors"]
+
+	showUnitsFromData(visible_map_sectors)
+		
+	# updateMap(visible_map_sectors)
 
 func colorObject(object, color):
 	var material = object.get_node("MeshInstance3D").get_active_material(0)
@@ -524,6 +638,9 @@ func getSelectedEntity(location: Vector2i) -> Entity:
 	#print()
 	#print(game.map.sectors[location.x][location.y])
 	
+	if ! game.teams[game.activeTeamId].visible_area.has(location): # neprijateljski unit kaze da nema nista
+		return null
+	
 	for unit in game.map.sectors[location.x][location.y]:
 		if top_unit == null:
 			top_unit = unit
@@ -533,15 +650,27 @@ func getSelectedEntity(location: Vector2i) -> Entity:
 	if top_unit == null || top_unit["namespace"] != "units":
 		return null
 		
-	var sector_entitites = getSectorsAllEntities()
+	var sector_entitites = getSectorsAllEntities(game.map.sectors)
 	
 	return sector_entitites[top_unit["id"]]
 	
 func selectedCell(location: Vector2i) -> void:
+	if (selected_cell != null && selected_cell.location == location):
+		return
+	
 	if (availible_moves[location.x][location.y] != null):
 		if internet_enabled:
+			clearActions()
 			await move(location)
+			# var map_data = json.data["sectors"]
+		
+			# updateMap(map_data)
+			selected_cell = null
 		return
+
+	# print(selected_cell == null)
+	# if (selected_cell != null):
+	#     print(selected_cell.location != location)
 
 	if (selected_cell == null || selected_cell.location != location):
 		clearActions()
@@ -559,19 +688,29 @@ func selectedCell(location: Vector2i) -> void:
 		return
 	
 	if internet_enabled:
-		var name = "selectedCell"
+		var send_name = "selectedCell1"
+		var send_endpoint = "/game/"+ game.id +"/team/" + game.activeTeamId \
+			 + "/unit/" + selected_entity.id + "/build/available-buildings"
+		var send_headers = []
+		var send_method = HTTPClient.METHOD_GET
+		var send_data = JSON.stringify({})
+
+		await awaitResponse(send_name, send_endpoint, send_headers, send_method, send_data)
+
+		# var name = "selectedCell"
 		
-		var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
-			 + "/end-unit/" + selected_entity.id + "/build/available-buildings", 
-			[], HTTPClient.METHOD_POST, JSON.stringify({}))
+		# var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
+		#      + "/end-unit/" + selected_entity.id + "/build/available-buildings", 
+		#     [], HTTPClient.METHOD_POST, JSON.stringify({}))
 		
-		if error != OK:
-			push_error(name + " sendRequest available")
+		# if error != OK:
+		#     push_error(name + " sendRequest available")
 		
-		await http_completed
+		# await http_completed
 		
-		getJson(name, body)
-		
+		# passJson(name, body)
+
+		print(json.data)
 		var available_buldings = json.data["availableBuildings"]
 		
 		var building_select = get_node("UserInterface/BuildingSelect")
@@ -586,20 +725,32 @@ func selectedCell(location: Vector2i) -> void:
 				buttons[i].set_visible(false)
 		
 		for ns_type in available_buldings:
-			var pos = building_types.find(ns_type["type"])
+			var pos = building_types.find(ns_type[1])
 			buttons[pos+1].set_visible(true)
+
+
+		send_name = "selectedCell2"
+		send_endpoint = "/game/"+ game.id +"/team/" + game.activeTeamId \
+			 + "/unit/" + selected_entity.id + "/move/reachable-sectors"
+		send_headers = []
+		send_method = HTTPClient.METHOD_GET
+		send_data = JSON.stringify({})
+
+		await awaitResponse(send_name, send_endpoint, send_headers, send_method, send_data)
 			
 		
-		error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
-			 + "/end-unit/" + selected_entity.id + "/move/reachable-sectors", 
-			[], HTTPClient.METHOD_POST, JSON.stringify({}))
+		# error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
+		#      + "/end-unit/" + selected_entity.id + "/move/reachable-sectors", 
+		#     [], HTTPClient.METHOD_POST, JSON.stringify({}))
 		
-		if error != OK:
-			push_error(name + " sendRequest available")
+		# if error != OK:
+		#     push_error(name + " sendRequest available")
 		
-		await http_completed
+		# await http_completed
 		
-		getJson(name, body)
+		# passJson(name, body)
+
+
 		
 		var reachable_sectors = json.data["sectors"]
 		
@@ -639,6 +790,8 @@ func selectedCell(location: Vector2i) -> void:
 	# work with results -> result, response_code, headers, body
 
 func setAvailableMoves(reachable_sectors):
+	if reachable_sectors == null:
+		return
 	for pos in reachable_sectors:
 		availible_moves[pos["x"]][pos["y"]] = 1
 		
@@ -646,16 +799,11 @@ func colorAvailableMoves(color):
 	for i in range(field_size):
 		for j in range(field_size):
 			if availible_moves[i][j] != null:
-				selected_cell = hitboxes[i][j]
-				colorObject(selected_cell, color)
+				var availible_cell = hitboxes[i][j]
+				colorObject(availible_cell, color)
 
 
-func clearActions():
-	for i in range(field_size):
-		availible_moves.append([]) 
-		for j in range(field_size):
-			availible_moves[i].append(null)
-			
+func clearActions():			
 	var building_select = get_node("UserInterface/BuildingSelect")
 	var buttons = building_select.get_children()
 	
@@ -670,252 +818,638 @@ func clearActions():
 	if (selected_cell != null):
 		colorObject(selected_cell, not_selected)
 		
+	
+	availible_moves = []
+	for i in range(field_size):
+		availible_moves.append([]) 
+		for j in range(field_size):
+			availible_moves[i].append(null)
+		
 	#print(selected_cell.location)
 	
 # TODO
 func move(location):
 	if internet_enabled:
-		var name = "move"
-		var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
-			 + "/visible-map" , [], HTTPClient.METHOD_POST, JSON.stringify({}))
-		
-		if error != OK:
-			push_error(name + " move")
-		
-		await http_completed
-		
-		getJson(name, body)
-		
+		var send_name = "move"
+		var send_endpoint = "/game/"+ game.id +"/team/" + game.activeTeamId \
+			 + "/unit/" + selected_entity.id + "/move"
+		var send_headers = []
+		var send_method = HTTPClient.METHOD_POST
+		var send_data = JSON.stringify({"targetPosition": {"x": location.x, "y": location.y}})
+
+		await awaitResponse(send_name, send_endpoint, send_headers, send_method, send_data)
+
+	else:
+		pass
+
+	await get_game_info(game.id)
+	await updateMap()
 	
-	resetMap()
+	print(game.map.sectors[location.x][location.y])
+
+
+
+		# var name = "move"
+		# var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
+		#      + "/visible-map" , [], HTTPClient.METHOD_POST, JSON.stringify({}))
+		
+		# if error != OK:
+		#     push_error(name + " move")
+		
+		# await http_completed
+		
+		# passJson(name, body)
 	
 	
 	
-func getJson(where, body):
-	var error = json.parse(body)
+func passJson(where):
+	print("recieved from " + where)
+	#print(body)
+	var error = json.parse(body.get_string_from_utf8())
+
+	print(json.data)
 	
 	if error != OK:
 		push_error(where + " json")
-		push_error("JSON Parse Error: " + json.get_error_message() + " in " + body + 
-			" at line " + json.get_error_line())
+		#push_error(error)
+		push_error("JSON Parse Error: " + json.get_error_message() + " in " + body.get_string_from_utf8() + 
+			" at line " + str(json.get_error_line()))
 
 func getVisibleMap():
 	if internet_enabled:
-		var name = "getVisibleMap"
-		var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
-			 + "/visible-map" , [], HTTPClient.METHOD_POST, JSON.stringify({}))
-		
-		if error != OK:
-			push_error(name + " getVisibleMap")
-		
-		await http_completed
-		
-		getJson(name, body)
+		var send_name = "getVisibleMap"
+		var send_endpoint = "/game/"+ game.id +"/team/" + game.activeTeamId + "/visible-map"
+		var send_headers = []
+		var send_method = HTTPClient.METHOD_GET
+		var send_data = JSON.stringify({})
 
-func startGame():
+		await awaitResponse(send_name, send_endpoint, send_headers, send_method, send_data)
+
+		# var name = "getVisibleMap"
+		# var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
+		#      + "/visible-map" , [], HTTPClient.METHOD_POST, JSON.stringify({}))
+		
+		# if error != OK:
+		#     push_error(name + " getVisibleMap")
+		
+		# await http_completed
+		
+		# passJson(name, body)
+
+func createTeam(game_id: String, team_name: String):
 	if internet_enabled:
-		var name = "startGame"
-		var error = send_request("/game" , [], HTTPClient.METHOD_POST, JSON.stringify({"mapName": "mapa"}))
+		var send_name = "createTeam"
+		var send_endpoint = "/game/" + game_id + "/team"
+		var send_headers = []
+		var send_method = HTTPClient.METHOD_POST
+		var send_data = JSON.stringify({"name": team_name})
+
+		await awaitResponse(send_name, send_endpoint, send_headers, send_method, send_data)
+
+	#print(json.data)
+
+	game.teams[json.data["team"]["id"]] = Team.new()
+	# game.teams[json.data["team"]["id"]].name = json.data["team"]["name"]
+
+func createGame(send_map_name: String):
+	if internet_enabled:
+		var send_name = "createGame"
+		var send_endpoint = "/game"
+		var send_headers = []
+		var send_method = HTTPClient.METHOD_POST
+		var send_data = JSON.stringify({"mapName": send_map_name})
+
+		# print("waiting for response")
 		
-		#print(error)
-		
-		if error != OK:
-			push_error(name + " startGame")
-		
-		await http_completed
-		
-		print(response_code)
-		print(body)
-		print(json.parse(body))
-		
-		getJson(name, body)
-		
-	else:
-		var body = '{
-  "game": {
-	"id": "string",
-	"map": {
-	  "sectors": [
-		[
-		  [
-			{
-			  "id": "string",
-			  "position": {
-				"x": 0,
-				"y": 0
-			  },
-			  "teamId": "string",
-			  "type": "string",
-			  "namespace": "string",
-			  "additionalProp1": {}
-			}
-		  ]
-		]
-	  ],
-	  "entities": {
-		"additionalProp1": {
-		  "id": "string",
-		  "position": {
-			"x": 0,
-			"y": 0
-		  },
-		  "teamId": "string",
-		  "type": "string",
-		  "namespace": "string",
-		  "additionalProp1": {}
-		},
-		"additionalProp2": {
-		  "id": "string",
-		  "position": {
-			"x": 0,
-			"y": 0
-		  },
-		  "teamId": "string",
-		  "type": "string",
-		  "namespace": "string",
-		  "additionalProp1": {}
-		},
-		"additionalProp3": {
-		  "id": "string",
-		  "position": {
-			"x": 0,
-			"y": 0
-		  },
-		  "teamId": "string",
-		  "type": "string",
-		  "namespace": "string",
-		  "additionalProp1": {}
-		}
-	  },
-	  "influence": [
-		[
-		  "string"
-		]
-	  ]
-	},
-	"teams": {
-	  "additionalProp1": {
-		"id": "string",
-		"name": "string",
-		"visibleArea": [
-		  {
-			"x": 0,
-			"y": 0
-		  }
-		],
-		"resources": {
-		  "food": 0,
-		  "wood": 0,
-		  "minerals": 0
-		}
-	  },
-	  "additionalProp2": {
-		"id": "string",
-		"name": "string",
-		"visibleArea": [
-		  {
-			"x": 0,
-			"y": 0
-		  }
-		],
-		"resources": {
-		  "food": 0,
-		  "wood": 0,
-		  "minerals": 0
-		}
-	  },
-	  "additionalProp3": {
-		"id": "string",
-		"name": "string",
-		"visibleArea": [
-		  {
-			"x": 0,
-			"y": 0
-		  }
-		],
-		"resources": {
-		  "food": 0,
-		  "wood": 0,
-		  "minerals": 0
-		}
-	  }
-	},
-	"history": {
-	  "actions": [],
-	  "mapStates": []
-	},
-	"state": "before_start",
-	"activeTeamId": "neutral",
-	"winningTeamId": "neutral"
-  }
-}'
-		getJson(name, body)
+		await awaitResponse(send_name, send_endpoint, send_headers, send_method, send_data)
+
+		# print("arrived")
+
+#     else:
+#         body = '{
+#   "game": {
+#     "id": "string",
+#     "map": {
+#       "sectors": [
+#         [
+#           [
+#             {
+#               "id": "string",
+#               "position": {
+#                 "x": 0,
+#                 "y": 0
+#               },
+#               "teamId": "string",
+#               "type": "string",
+#               "namespace": "string",
+#               "additionalProp1": {}
+#             }
+#           ]
+#         ]
+#       ],
+#       "entities": {
+#         "additionalProp1": {
+#           "id": "string",
+#           "position": {
+#             "x": 0,
+#             "y": 0
+#           },
+#           "teamId": "string",
+#           "type": "string",
+#           "namespace": "string",
+#           "additionalProp1": {}
+#         },
+#         "additionalProp2": {
+#           "id": "string",
+#           "position": {
+#             "x": 0,
+#             "y": 0
+#           },
+#           "teamId": "string",
+#           "type": "string",
+#           "namespace": "string",
+#           "additionalProp1": {}
+#         },
+#         "additionalProp3": {
+#           "id": "string",
+#           "position": {
+#             "x": 0,
+#             "y": 0
+#           },
+#           "teamId": "string",
+#           "type": "string",
+#           "namespace": "string",
+#           "additionalProp1": {}
+#         }
+#       },
+#       "influence": [
+#         [
+#           "string"
+#         ]
+#       ]
+#     },
+#     "teams": {
+#       "additionalProp1": {
+#         "id": "string",
+#         "name": "string",
+#         "visibleArea": [
+#           {
+#             "x": 0,
+#             "y": 0
+#           }
+#         ],
+#         "resources": {
+#           "food": 0,
+#           "wood": 0,
+#           "minerals": 0
+#         }
+#       },
+#       "additionalProp2": {
+#         "id": "string",
+#         "name": "string",
+#         "visibleArea": [
+#           {
+#             "x": 0,
+#             "y": 0
+#           }
+#         ],
+#         "resources": {
+#           "food": 0,
+#           "wood": 0,
+#           "minerals": 0
+#         }
+#       },
+#       "additionalProp3": {
+#         "id": "string",
+#         "name": "string",
+#         "visibleArea": [
+#           {
+#             "x": 0,
+#             "y": 0
+#           }
+#         ],
+#         "resources": {
+#           "food": 0,
+#           "wood": 0,
+#           "minerals": 0
+#         }
+#       }
+#     },
+#     "history": {
+#       "actions": [],
+#       "mapStates": []
+#     },
+#     "state": "before_start",
+#     "activeTeamId": "neutral",
+#     "winningTeamId": "neutral"
+#   }
+# }'
+
+		# passJson(name)
+
+	# print(json.data)
 		
 	game = Game.new()
+	game.id = json.data["game"]["id"]
+	# game.setFromJSON(json.data["game"])
+
+func start_game(game_id: String):
+	if internet_enabled:
+		var send_name = "start_game"
+		var send_endpoint = "/game/" + game_id + "/start" 
+		var send_headers = []
+		var send_method = HTTPClient.METHOD_POST
+		var send_data = JSON.stringify({})
+
+		await awaitResponse(send_name, send_endpoint, send_headers, send_method, send_data)
+
+		# var name = "start_game"
+		# var error = send_request("/game" , [], HTTPClient.METHOD_POST, JSON.stringify({"mapName": "mapa"}))
+		
+		# #print(error)
+		
+		# if error != OK:
+		#     push_error(name + " start_game")
+		
+		# await http_completed
+		
+		# print(response_code)
+		# print(body)
+		# print(json.parse(body))
+		
+		# passJson(name, body)
+		
+#     else:
+#         body = '{
+#   "game": {
+#     "id": "string",
+#     "map": {
+#       "sectors": [
+#         [
+#           [
+#             {
+#               "id": "string",
+#               "position": {
+#                 "x": 0,
+#                 "y": 0
+#               },
+#               "teamId": "string",
+#               "type": "string",
+#               "namespace": "string",
+#               "additionalProp1": {}
+#             }
+#           ]
+#         ]
+#       ],
+#       "entities": {
+#         "additionalProp1": {
+#           "id": "string",
+#           "position": {
+#             "x": 0,
+#             "y": 0
+#           },
+#           "teamId": "string",
+#           "type": "string",
+#           "namespace": "string",
+#           "additionalProp1": {}
+#         },
+#         "additionalProp2": {
+#           "id": "string",
+#           "position": {
+#             "x": 0,
+#             "y": 0
+#           },
+#           "teamId": "string",
+#           "type": "string",
+#           "namespace": "string",
+#           "additionalProp1": {}
+#         },
+#         "additionalProp3": {
+#           "id": "string",
+#           "position": {
+#             "x": 0,
+#             "y": 0
+#           },
+#           "teamId": "string",
+#           "type": "string",
+#           "namespace": "string",
+#           "additionalProp1": {}
+#         }
+#       },
+#       "influence": [
+#         [
+#           "string"
+#         ]
+#       ]
+#     },
+#     "teams": {
+#       "additionalProp1": {
+#         "id": "string",
+#         "name": "string",
+#         "visibleArea": [
+#           {
+#             "x": 0,
+#             "y": 0
+#           }
+#         ],
+#         "resources": {
+#           "food": 0,
+#           "wood": 0,
+#           "minerals": 0
+#         }
+#       },
+#       "additionalProp2": {
+#         "id": "string",
+#         "name": "string",
+#         "visibleArea": [
+#           {
+#             "x": 0,
+#             "y": 0
+#           }
+#         ],
+#         "resources": {
+#           "food": 0,
+#           "wood": 0,
+#           "minerals": 0
+#         }
+#       },
+#       "additionalProp3": {
+#         "id": "string",
+#         "name": "string",
+#         "visibleArea": [
+#           {
+#             "x": 0,
+#             "y": 0
+#           }
+#         ],
+#         "resources": {
+#           "food": 0,
+#           "wood": 0,
+#           "minerals": 0
+#         }
+#       }
+#     },
+#     "history": {
+#       "actions": [],
+#       "mapStates": []
+#     },
+#     "state": "before_start",
+#     "activeTeamId": "neutral",
+#     "winningTeamId": "neutral"
+#   }
+# }'
+#         passJson(name)
+		
+#     game = Game.new()
+#     game.setFromJSON(json.data["game"])
+
+
+func get_game_info(game_id: String):
+	if internet_enabled:
+		var send_name = "get_game_info"
+		var send_endpoint = "/game/" + game_id
+		var send_headers = []
+		var send_method = HTTPClient.METHOD_GET
+		var send_data = JSON.stringify({})
+
+		await awaitResponse(send_name, send_endpoint, send_headers, send_method, send_data)
+
+		# game = Game.new()
+#     else:
+#         body = '{
+#   "game": {
+#     "id": "string",
+#     "map": {
+#       "sectors": [
+#         [
+#           [
+#             {
+#               "id": "string",
+#               "position": {
+#                 "x": 0,
+#                 "y": 0
+#               },
+#               "teamId": "string",
+#               "type": "string",
+#               "namespace": "string",
+#               "additionalProp1": {}
+#             }
+#           ]
+#         ]
+#       ],
+#       "entities": {
+#         "additionalProp1": {
+#           "id": "string",
+#           "position": {
+#             "x": 0,
+#             "y": 0
+#           },
+#           "teamId": "string",
+#           "type": "string",
+#           "namespace": "string",
+#           "additionalProp1": {}
+#         },
+#         "additionalProp2": {
+#           "id": "string",
+#           "position": {
+#             "x": 0,
+#             "y": 0
+#           },
+#           "teamId": "string",
+#           "type": "string",
+#           "namespace": "string",
+#           "additionalProp1": {}
+#         },
+#         "additionalProp3": {
+#           "id": "string",
+#           "position": {
+#             "x": 0,
+#             "y": 0
+#           },
+#           "teamId": "string",
+#           "type": "string",
+#           "namespace": "string",
+#           "additionalProp1": {}
+#         }
+#       },
+#       "influence": [
+#         [
+#           "string"
+#         ]
+#       ]
+#     },
+#     "teams": {
+#       "additionalProp1": {
+#         "id": "string",
+#         "name": "string",
+#         "visibleArea": [
+#           {
+#             "x": 0,
+#             "y": 0
+#           }
+#         ],
+#         "resources": {
+#           "food": 0,
+#           "wood": 0,
+#           "minerals": 0
+#         }
+#       },
+#       "additionalProp2": {
+#         "id": "string",
+#         "name": "string",
+#         "visibleArea": [
+#           {
+#             "x": 0,
+#             "y": 0
+#           }
+#         ],
+#         "resources": {
+#           "food": 0,
+#           "wood": 0,
+#           "minerals": 0
+#         }
+#       },
+#       "additionalProp3": {
+#         "id": "string",
+#         "name": "string",
+#         "visibleArea": [
+#           {
+#             "x": 0,
+#             "y": 0
+#           }
+#         ],
+#         "resources": {
+#           "food": 0,
+#           "wood": 0,
+#           "minerals": 0
+#         }
+#       }
+#     },
+#     "history": {
+#       "actions": [],
+#       "mapStates": []
+#     },
+#     "state": "before_start",
+#     "activeTeamId": "neutral",
+#     "winningTeamId": "neutral"
+#   }
+# }'
+
 	game.setFromJSON(json.data["game"])
+
+func buildingSelected(extra_arg_0: String):
+#func buildingSelected(event: InputEvent, extra_arg_0: String) -> void:
+	#if (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
+	print(extra_arg_0)
+	var pos = building_types.find(extra_arg_0)
+	if internet_enabled:
+		var send_name = "buildingSelected"
+		var send_endpoint = "/game/"+ game.id +"/team/" + game.activeTeamId + "/unit/" + selected_entity.id + "/build"
+		var send_headers = []
+		var send_method = HTTPClient.METHOD_POST
+		var send_data = JSON.stringify({
+				"buildingType": building_types[pos],
+				"buildingNamespace": building_ns[pos]
+				})
+
+		await awaitResponse(send_name, send_endpoint, send_headers, send_method, send_data)
+
+	else:
+		body = '{"id":"1c83c71f-f051-40ba-b591-183e040addd6","position":{"x":0,"y":0},"teamId":"34214631246321463123","type":"Capital","namespace":"buildings"}'
+
+		# var name = "buildingSelected"
+		# var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
+		#      + "/unit/" + selected_entity.id + "/build" , [], HTTPClient.METHOD_POST, 
+		#     JSON.stringify({
+		#         "buildingType": building_types[pos],
+		#         "buildingNamespace": building_ns[pos]
+		#     }))
+		
+		# if error != OK:
+		#     push_error(name + " buildingSelected")
+		
+		# await http_completed
+		
+		# passJson(name, body)
+
 	
-func buildingSelected(event: InputEvent, extra_arg_0: String) -> void:
-	if (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
-		print(extra_arg_0)
-		var pos = building_types.find(extra_arg_0)
-		if internet_enabled:
-			var name = "buildingSelected"
-			var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
-				 + "/unit/" + selected_entity.id + "/build" , [], HTTPClient.METHOD_POST, 
-				JSON.stringify({
-					"buildingType": building_types[pos],
-					"buildingNamespace": building_ns[pos]
-				}))
-			
-			if error != OK:
-				push_error(name + " buildingSelected")
-			
-			await http_completed
-			
-			getJson(name, body)
+	print("Built " + body["namespace"] + " "  + body["type"])
+
+	await get_game_info(game.id)
+	await updateMap()
 	
 func newTurnPressed():
 	if internet_enabled:
-		var name = "newTurnPressed"
-		var error = send_request("/game/"+ game.id +"/team/" + game.activeTeamId
-			 + "/end-turn" , [], HTTPClient.METHOD_POST, JSON.stringify({}))
+		var send_name = "newTurnPressed"
+		var send_endpoint = "/game/"+ game.id +"/team/" + game.activeTeamId + "/end-turn"
+		var send_headers = []
+		var send_method = HTTPClient.METHOD_POST
+		var send_data = JSON.stringify({})
+
+		await awaitResponse(send_name, send_endpoint, send_headers, send_method, send_data)
+	
+	#clearMap()
+	clearActions()
+	selected_cell = null
+	await get_game_info(game.id)
+	await updateMap()
+	updateResources()
+	
+func updateResources():
+	#var resources: Resources
+	#if label.resources == null:
+		#resources = Resources.new()
+	#else:
+		#resources = label.resources
+	#resources.food += 1
+	#resources.wood += 1
+	#resources.minerals += 1
+	
+	label.updateResources(game.teams[game.activeTeamId].resources)
+	
+
+func awaitResponse(send_name: String, send_endpoint: String, send_headers: PackedStringArray, send_method: HTTPClient.Method, send_data: String):
+	if internet_enabled:
+		var error = send_request(send_endpoint, send_headers, send_method, send_data)
 		
 		if error != OK:
-			push_error(name + " newTurnPressed")
+			push_error(send_name + " " + error)
 		
 		await http_completed
 		
-		getJson(name, body)
+		passJson(send_name)
 	
-func cancelAction():
-	if (selected_cell != null):
-		colorObject(selected_cell, not_selected)
+# func cancelAction():
+#     if (selected_cell != null):
+#         colorObject(selected_cell, not_selected)
 		
 	
-	var resources: Resources
-	if label.resources == null:
-		resources = Resources.new()
-	else:
-		resources = label.resources
+#     var resources: Resources
+#     if label.resources == null:
+#         resources = Resources.new()
+#     else:
+#         resources = label.resources
 	
-	resources.food += 1
-	resources.wood += 1
-	resources.minerals += 1
+#     resources.food += 1
+#     resources.wood += 1
+#     resources.minerals += 1
 	
-	label.updateResources(resources)
+#     label.updateResources(resources)
 	
 func _input(event: InputEvent) -> void:
 	
 	if (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT):
 		clearActions()
+		selected_cell = null
+		
 
-func send_request(endpoint: String, headers: PackedStringArray, method: HTTPClient.Method, data: String):
-	var error = http_request.request(url+endpoint, headers, method, data)
+func send_request(send_endpoint: String, send_headers: PackedStringArray, send_method: HTTPClient.Method, send_data: String):
+	var error = http_request.request(url+send_endpoint, send_headers, send_method, send_data)
 	if error != OK:
 		push_error("An error occurred in the HTTP request.")
 	
-	print("requestted http")	
-	print(url+endpoint, headers, method, data)
+	print("requestted http")    
+	print(url+send_endpoint + " " + str(send_headers) + " " + str(send_method) + " " + send_data)
 	
 	return error
 	
@@ -929,6 +1463,8 @@ func _http_request_completed(_result, _response_code, _headers, _body):
 	response_code = _response_code
 	headers = _headers
 	body = _body
+	
+	#print("body " + str(body))
 	
 	print("_http_request_completed")
 	
