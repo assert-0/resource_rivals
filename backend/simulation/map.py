@@ -116,7 +116,7 @@ class Map(BaseModel):
             if getattr(entity, "calculate_influence", None) is None:
                 continue
 
-            influence_cloud = entity.calculate_influence(
+            influence_cloud = entity.calculate_influence(  # type: ignore
                 self.sectors, self.influence
             )
             for position in influence_cloud:

@@ -70,9 +70,9 @@ class Worker(Unit, ConcreteEntity):
             raise ValueError("Building not allowed to be built here")
 
         cost = Resources(
-            food=building_instance.cost[0],
-            wood=building_instance.cost[1],
-            minerals=building_instance.cost[2],
+            food=building_instance.cost[0],  # type: ignore
+            wood=building_instance.cost[1],  # type: ignore
+            minerals=building_instance.cost[2],  # type: ignore
         )
 
         if game.teams[self.teamId].resources.can_afford(cost):
@@ -83,4 +83,4 @@ class Worker(Unit, ConcreteEntity):
         else:
             raise ValueError("Not enough resources to build")
 
-        return building_instance
+        return building_instance  # type: ignore

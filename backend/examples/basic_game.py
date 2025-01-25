@@ -71,7 +71,8 @@ def perform_turn(game_id: str, team_id: str):
     logger.info(f"Performing turn for team {team_id}")
 
     end_turn_url = f"{api_prefix}/game/{game_id}/team/{team_id}/end-turn"
-    get_visible_map_url = f"{api_prefix}/game/{game_id}/team/{team_id}/visible-map"
+    get_visible_map_url = \
+        f"{api_prefix}/game/{game_id}/team/{team_id}/visible-map"
 
     response = requests.get(get_visible_map_url)
     if response.status_code != 200:
@@ -91,38 +92,47 @@ def perform_turn(game_id: str, team_id: str):
             logger.debug(f"Entities in sector: {sector}")
 
             for entity in sector:
-                if entity["type"] == "Units.Worker" and entity["teamId"] == team_id:
+                if (
+                        entity["type"] == "Worker"
+                        and entity["teamId"] == team_id
+                ):
                     logger.info(f"Friendly worker unit found at {i}, {j}")
                     logger.debug(f"Entity: {entity}")
                     selected_worker_id = entity["id"]
 
     if not selected_worker_id:
-        logger.error("No worker unit found to move")
-        return
+        raise ValueError("No worker unit found to move")
 
-    get_reachable_sectors_url = f"{api_prefix}/game/{game_id}/team/{team_id}/unit/{selected_worker_id}/reachable-sectors"
-    response = requests.get(get_reachable_sectors_url.format(selected_worker_id))
+    get_reachable_sectors_url = (
+        f"{api_prefix}/game/{game_id}/team/{team_id}/"
+        f"unit/{selected_worker_id}/reachable-sectors"
+    )
+    response = requests.get(
+        get_reachable_sectors_url.format(selected_worker_id)
+    )
     if response.status_code != 200:
-        logger.error(f"Error getting reachable sectors: {response.json()}")
-        return
+        raise ValueError(f"Error getting reachable sectors: {response.json()}")
 
     reachable_sectors = response.json()["sectors"]
     logger.info(f"Reachable sectors: {reachable_sectors}")
     selected_sector = reachable_sectors[0]
 
-    move_unit_url = f"{api_prefix}/game/{game_id}/team/{team_id}/unit/{selected_worker_id}/move"
-    response = requests.post(move_unit_url, json={"targetPosition": selected_sector})
+    move_unit_url = (
+        f"{api_prefix}/game/{game_id}/team/{team_id}/"
+        f"unit/{selected_worker_id}/move"
+    )
+    response = requests.post(
+        move_unit_url, json={"targetPosition": selected_sector}
+    )
 
     if response.status_code != 200:
-        logger.error(f"Error moving unit: {response.json()}")
-        return
+        raise ValueError(f"Error moving unit: {response.json()}")
 
     logger.info(f"Unit moved to {selected_sector}")
 
     response = requests.post(end_turn_url)
     if response.status_code != 200:
-        logger.error(f"Error ending turn: {response.json()}")
-        return
+        raise ValueError(f"Error ending turn: {response.json()}")
 
     logger.info("Turn ended")
 

@@ -51,14 +51,17 @@ class Team(BaseModel):
     def recalculate_visible_area(self, _map: Map) -> None:
         for entity in _map.get_entities_by_team(self.id):
             if isinstance(entity, Unit):
-                self.visibleArea.update(entity.get_visible_area(_map))
+                self.visibleArea.update(entity.calculate_visible_area())
 
     def get_visible_map(self, _map: Map) -> List[List[Optional[List[Entity]]]]:
         visible_map = _map.model_copy(deep=True)
+        visible_sectors: List[List[Optional[List[Entity]]]] = (
+            visible_map.sectors  # type: ignore
+        )
 
         for x in range(visible_map.width):
             for y in range(visible_map.height):
                 if Point(x, y) not in self.visibleArea:
-                    visible_map.sectors[x][y] = None
+                    visible_sectors[x][y] = None
 
-        return visible_map.sectors
+        return visible_sectors

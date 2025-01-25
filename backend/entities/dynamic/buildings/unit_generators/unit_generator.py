@@ -1,7 +1,7 @@
-from entities.entity import Entity
+from entities.dynamic.buildings.building import Building
 
 
-class UnitGenerator(Entity):
+class UnitGenerator(Building):
     @classmethod
     def get_namespace(cls) -> str:
         return "buildings/unit_generators"

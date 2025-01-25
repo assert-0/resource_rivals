@@ -9,6 +9,9 @@ from simulation.consts import GameStates
 from simulation.history import History
 from simulation.map import Map
 from simulation.team import Team
+from utils.logger import get_logger
+
+logger = get_logger("game")
 
 
 class Game(BaseModel):
@@ -22,33 +25,50 @@ class Game(BaseModel):
 
     @staticmethod
     def new_game(map_path: str, **__) -> "Game":
+        logger.info(f"Creating new game with map: {map_path}")
         _map = Map.from_file(map_path)
-        return Game(map=_map)
+        game = Game(map=_map)
+        logger.debug(f"Created game with id: {game.id}")
+        return game
 
     def get_active_team(self) -> Team:
         return self.teams[self.activeTeamId]
 
     def register_team(self, name: str) -> Team:
+        logger.info(f"Registering new team: {name}")
         team = Team(name=name)
         self.teams[team.id] = team
+        logger.debug(f"Registered team with id: {team.id}")
         return team
 
     def start(self) -> None:
+        logger.info(f"Starting game ({self.id})")
         self.state = GameStates.IN_PROGRESS
         self.activeTeamId = list(self.teams.keys())[0]
 
+        logger.debug(f"Active team: {self.activeTeamId}")
+
         self._mark_capitals()
 
+        logger.debug("Executing on_turn_start for the first time")
         self._on_turn_start()
 
+        logger.info(f"Game started with active team: {self.activeTeamId}")
+
     def end_turn(self) -> None:
+        logger.info(f"Ending turn for team: {self.activeTeamId}")
+
         if winning_team := self._has_ended():
+            logger.info(f"Game has ended, winning team: {winning_team}")
             self.stop(winning_team)
 
+        logger.debug("Executing on_turn_end")
         self._on_turn_end()
 
         self.activeTeamId = self._get_next_team_id()
+        logger.info(f"Starting turn for team: {self.activeTeamId}")
 
+        logger.debug("Executing on_turn_start")
         self._on_turn_start()
 
     def stop(self, winning_team_id: str = TEAMS_NEUTRAL_ID) -> None:
@@ -57,6 +77,8 @@ class Game(BaseModel):
         self.winningTeamId = winning_team_id
 
     def _mark_capitals(self):
+        logger.info("Marking capitals")
+
         capitals: Set[Capital] = {
             entity for entity in self.map.get_entities()
             if isinstance(entity, Capital)
@@ -92,8 +114,22 @@ class Game(BaseModel):
 
     def _on_turn_start(self):
         for entity in self.map.get_entities_by_team(self.activeTeamId):
+            logger.debug(
+                f"Executing on_turn_start for entity: "
+                f"({entity.type}, {entity.id})"
+            )
             entity.on_turn_start(self)
+
+        logger.debug("Recalculating visible area")
+        self.teams[self.activeTeamId].recalculate_visible_area(self.map)
 
     def _on_turn_end(self):
         for entity in self.map.get_entities_by_team(self.activeTeamId):
+            logger.debug(
+                f"Executing on_turn_end for entity: "
+                f"({entity.type}, {entity.id})"
+            )
             entity.on_turn_end(self)
+
+        logger.debug("Recalculating visible area")
+        self.teams[self.activeTeamId].recalculate_visible_area(self.map)

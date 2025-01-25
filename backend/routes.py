@@ -3,6 +3,8 @@ from pathlib import Path
 from fastapi import APIRouter, Request, Response
 
 from consts import MAP_DIR
+from entities.dynamic.units.unit import Unit
+from entities.dynamic.units.worker import Worker
 from server import server
 from simulation.actions.response import Response as GenericResponse
 from simulation.actions.game.create import (
@@ -193,9 +195,14 @@ async def create_building(
     try:
         game = server.get_game(game_id)
         unit = game.map.entities[unit_id]
+        if not isinstance(unit, Worker):
+            raise ValueError(
+                f"Only workers can build. Selected unit type: {unit.type}"
+            )
         building = unit.build(
             parsed_request.buildingNamespace, parsed_request.buildingType, game
         )
+        game.teams[team_id].recalculate_visible_area(game.map)
     except ValueError as e:
         return BuildCreateResponse(error=str(e), building=None)
 
@@ -212,7 +219,11 @@ async def get_available_buildings(
     try:
         game = server.get_game(game_id)
         unit = game.map.entities[unit_id]
-        available_buildings = unit.calculate_available_buildings()
+        if not isinstance(unit, Worker):
+            raise ValueError(
+                f"Only workers can build. Selected unit type: {unit.type}"
+            )
+        available_buildings = unit.calculate_available_buildings(game)
     except ValueError as e:
         response.status_code = 400
         return UnitGetAvailableBuildingsResponse(
@@ -240,7 +251,13 @@ async def move_unit(
     try:
         game = server.get_game(game_id)
         unit = game.map.entities[unit_id]
+        if not isinstance(unit, Unit):
+            raise ValueError(
+                f"Only units can move/attack. "
+                f"Selected entity type: {unit.type}"
+            )
         unit.act(parsed_request.targetPosition, game.map)
+        game.teams[team_id].recalculate_visible_area(game.map)
     except ValueError as e:
         return GenericResponse(error=str(e))
 
@@ -257,6 +274,11 @@ async def get_reachable_sectors(
     try:
         game = server.get_game(game_id)
         unit = game.map.entities[unit_id]
+        if not isinstance(unit, Unit):
+            raise ValueError(
+                f"Only units can move/attack. "
+                f"Selected entity type: {unit.type}"
+            )
         reachable_sectors = unit.calculate_reachable_sectors(game)
     except ValueError as e:
         return UnitGetReachableSectorsResponse(

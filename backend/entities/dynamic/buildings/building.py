@@ -49,7 +49,9 @@ class Building(Entity):
 
     def _can_generate_unit(self, game) -> bool:
         current_sector = game.map.sectors[self.position.x][self.position.y]
-        current_population = game.teams[self.teamId].get_current_population()
+        current_population = (
+            game.teams[self.teamId].get_current_population(game.map)
+        )
         max_population = game.teams[self.teamId].maxPopulation
         return len(current_sector) == 1 and current_population < max_population
 

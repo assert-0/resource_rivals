@@ -7,6 +7,6 @@ from entities.entity import ConcreteEntity
 class Farm(ResourceCollector, ConcreteEntity):
     def on_turn_end(self, game) -> None:
         super().on_turn_end(game)
-        game.teams[self.team].resources.food += (
+        game.teams[self.teamId].resources.food += (
             RESOURCE_COLLECTORS_YIELD[Farm.__name__]
         )
