@@ -105,7 +105,7 @@ async def start_game(game_id: str, response: Response) -> GenericResponse:
     return GenericResponse()
 
 
-@api_router.post("/game/{game_id}/team/", response_model=TeamCreateResponse)
+@api_router.post("/game/{game_id}/team", response_model=TeamCreateResponse)
 async def create_team(
         game_id: str, request: Request, response: Response
 ) -> TeamCreateResponse:
