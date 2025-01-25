@@ -259,7 +259,7 @@ async def move_unit(
         if unit.id in game.movedUnits:
             raise ValueError("Unit has already moved this turn")
         unit.act(parsed_request.targetPosition, game.map)
-        game.movedUnits.append(unit.id)
+        game.movedUnits.add(unit.id)
         game.teams[team_id].recalculate_visible_area(game.map)
     except ValueError as e:
         return GenericResponse(error=str(e))
