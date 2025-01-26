@@ -71,6 +71,7 @@ class Game(RootModel):
         if winning_team := self._has_ended():
             logger.info(f"Game has ended, winning team: {winning_team}")
             self.stop(winning_team)
+            return
 
         logger.debug("Executing on_turn_end")
         self._on_turn_end()
