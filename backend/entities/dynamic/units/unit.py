@@ -91,18 +91,31 @@ class Unit(Entity):
 
         return movable_sectors + attackable_sectors
 
-    def calculate_visible_area(self) -> Set[Point]:
+    def calculate_visible_area(
+            self, max_width: int, max_height: int
+    ) -> Set[Point]:
+        logger.debug(f"Calculating visible area for {self.id}")
+
         visible_sectors = set()
 
+        max_range = max(self.movementRange, self.attackRange)
+
         for x in range(
-                self.position.x - self.attackRange,
-                self.position.x + self.attackRange + 1
+                self.position.x - max_range,
+                self.position.x + max_range + 1
         ):
             for y in range(
-                    self.position.y - self.attackRange,
-                    self.position.y + self.attackRange + 1
+                    self.position.y - max_range,
+                    self.position.y + max_range + 1
             ):
+                if (
+                        x < 0 or x >= max_width
+                        or y < 0 or y >= max_height
+                ):
+                    continue
                 visible_sectors.add(Point(x, y))
+
+        logger.debug(f"Visible area for {self.id}: {visible_sectors}")
 
         return visible_sectors
 

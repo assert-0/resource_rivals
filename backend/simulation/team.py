@@ -7,7 +7,10 @@ from consts import TEAMS_STARTING_POPULATION
 from entities.dynamic.units.unit import Unit
 from entities.entity import Entity
 from simulation.map import Map
+from utils.logger import get_logger
 from utils.math import Point
+
+logger = get_logger("team")
 
 
 class Resources(BaseModel):
@@ -49,11 +52,20 @@ class Team(BaseModel):
         return population
 
     def recalculate_visible_area(self, _map: Map) -> None:
+        logger.debug(f"Recalculating visible area for team: {self.id}")
+
         for entity in _map.get_entities_by_team(self.id):
+            logger.debug(f"Entity: {entity}")
             if isinstance(entity, Unit):
-                self.visibleArea.update(entity.calculate_visible_area())
+                self.visibleArea.update(
+                    entity.calculate_visible_area(_map.width, _map.height)
+                )
 
     def get_visible_map(self, _map: Map) -> List[List[Optional[List[Entity]]]]:
+        logger.debug("Getting visible map")
+
+        logger.debug(f"Visible area: {self.visibleArea}")
+
         visible_map = _map.model_copy(deep=True)
         visible_sectors: List[List[Optional[List[Entity]]]] = (
             visible_map.sectors  # type: ignore
