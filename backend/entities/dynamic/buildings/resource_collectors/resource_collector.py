@@ -1,7 +1,7 @@
-from entities.entity import Entity
+from entities.dynamic.buildings.building import Building
 
 
-class ResourceCollector(Entity):
+class ResourceCollector(Building):
     @classmethod
     def get_namespace(cls) -> str:
         return "buildings/resource_collectors"
