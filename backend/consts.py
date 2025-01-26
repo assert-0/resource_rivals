@@ -1,7 +1,7 @@
 import logging
 
 
-LOG_LEVEL = logging.DEBUG
+LOG_LEVEL = logging.INFO
 
 TEAMS_NEUTRAL_ID = "neutral"
 TEAMS_STARTING_POPULATION = 5
