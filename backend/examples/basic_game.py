@@ -117,7 +117,9 @@ def perform_turn(game_id: str, team_id: str):
         )
         response = requests.get(get_reachable_sectors_url)
         if response.status_code != 200:
-            raise ValueError(f"Error getting reachable sectors: {response.json()}")
+            raise ValueError(
+                f"Error getting reachable sectors: {response.json()}"
+            )
 
         reachable_sectors = response.json()["sectors"]
         logger.info(f"Reachable sectors: {reachable_sectors}")

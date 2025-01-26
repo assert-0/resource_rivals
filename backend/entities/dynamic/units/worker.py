@@ -55,7 +55,7 @@ class Worker(Unit, ConcreteEntity):
         except ValueError:
             raise ValueError("Building does not exist")
 
-        building_instance = building_cls(
+        building_instance = building_cls(  # type: ignore
             position=self.position, teamId=self.teamId,
         )
 
@@ -67,7 +67,7 @@ class Worker(Unit, ConcreteEntity):
         current_team = game.teams[self.teamId]
 
         if current_team.resources.can_afford(
-                self._get_building_cost(building_cls)
+                self._get_building_cost(building_cls)  # type: ignore
         ):
             cost = Resources(
                 food=building_instance.get_cost()[0],  # type: ignore

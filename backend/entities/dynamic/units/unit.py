@@ -154,6 +154,8 @@ class Unit(Entity):
                 ):
                     queue.append((neighbor, path_length + 1))
 
+        return True
+
     def calculate_visible_area(
             self, max_width: int, max_height: int
     ) -> Set[Point]:
