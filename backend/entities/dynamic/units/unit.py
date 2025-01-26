@@ -58,8 +58,13 @@ class Unit(Entity):
             _map.update_entity(self)
 
     def move(self, target: Point, _map) -> None:
-        if target not in self.calculate_reachable_sectors(_map.sectors):
+        if target not in self._calculate_sectors_in_range(_map.sectors):
             raise ValueError("Target is out of range")
+
+        if self._is_path_blocked(
+                self.position, target, _map.sectors, self.movementRange
+        ):
+            raise ValueError("Path to target is blocked by obstacles")
 
         self.position = target
         _map.update_entity(self)
@@ -67,11 +72,25 @@ class Unit(Entity):
     def calculate_reachable_sectors(
             self, sectors: List[List[List[Entity]]]
     ) -> List[Point]:
-        movable_sectors = []
-        attackable_sectors = []
-
         logger.debug(f"Calculating reachable sectors for {self}")
         logger.debug(f"Current position: {self.position}")
+
+        sectors_in_range = self._calculate_sectors_in_range(sectors)
+        reachable_sectors = []
+
+        for sector in sectors_in_range:
+            if not self._is_path_blocked(
+                    self.position, sector, sectors, self.movementRange
+            ):
+                reachable_sectors.append(sector)
+
+        return reachable_sectors
+
+    def _calculate_sectors_in_range(
+            self, sectors: List[List[List[Entity]]]
+    ) -> List[Point]:
+        movable_sectors = []
+        attackable_sectors = []
 
         for y, row in enumerate(sectors):
             for x, sector in enumerate(row):
@@ -90,6 +109,50 @@ class Unit(Entity):
                     attackable_sectors.append(Point(x, y))
 
         return movable_sectors + attackable_sectors
+
+    def _is_path_blocked(
+            self,
+            start: Point, end: Point,
+            sectors: List[List[List[Entity]]],
+            max_path_length: int
+    ) -> bool:
+        explored = set()
+        queue = [(start, 0)]
+
+        def get_neighbors(current, sectors):
+            neighbors = []
+            for i in range(-1, 2):
+                for j in range(-1, 2):
+                    if i == 0 and j == 0:
+                        continue
+
+                    x = current.x + i
+                    y = current.y + j
+
+                    if (
+                            x >= 0 and x < len(sectors[0])
+                            and y >= 0 and y < len(sectors)
+                    ):
+                        neighbors.append(Point(x, y))
+
+            return neighbors
+
+        while queue:
+            current, path_length = queue.pop(0)
+            explored.add(current)
+
+            if current == end:
+                return False
+
+            if path_length >= max_path_length:
+                continue
+
+            for neighbor in get_neighbors(current, sectors):
+                if (
+                        neighbor not in explored
+                        and self._sector_free(sectors[neighbor.y][neighbor.x])
+                ):
+                    queue.append((neighbor, path_length + 1))
 
     def calculate_visible_area(
             self, max_width: int, max_height: int

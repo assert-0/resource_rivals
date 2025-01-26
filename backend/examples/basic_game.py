@@ -80,8 +80,9 @@ def perform_turn(game_id: str, team_id: str):
         return
 
     visible_map = response.json()["sectors"]
+    visualize_map(visible_map)
 
-    selected_worker_id = None
+    available_workers = []
 
     for i, row in enumerate(visible_map):
         for j, sector in enumerate(row):
@@ -98,41 +99,65 @@ def perform_turn(game_id: str, team_id: str):
                 ):
                     logger.info(f"Friendly worker unit found at {i}, {j}")
                     logger.debug(f"Entity: {entity}")
-                    selected_worker_id = entity["id"]
+                    available_workers.append(
+                        [entity["id"], entity["position"]]
+                    )
 
-    if not selected_worker_id:
+    if not available_workers:
         raise ValueError("No worker unit found to move")
 
-    get_reachable_sectors_url = (
-        f"{api_prefix}/game/{game_id}/team/{team_id}/"
-        f"unit/{selected_worker_id}/move/reachable-sectors"
-    )
-    response = requests.get(get_reachable_sectors_url)
-    if response.status_code != 200:
-        raise ValueError(f"Error getting reachable sectors: {response.json()}")
+    for selected_worker_id, worker_position in available_workers:
+        logger.info(
+            f"Moving worker unit {selected_worker_id} at {worker_position}"
+        )
 
-    reachable_sectors = response.json()["sectors"]
-    logger.info(f"Reachable sectors: {reachable_sectors}")
-    selected_sector = reachable_sectors[0]
+        get_reachable_sectors_url = (
+            f"{api_prefix}/game/{game_id}/team/{team_id}/"
+            f"unit/{selected_worker_id}/move/reachable-sectors"
+        )
+        response = requests.get(get_reachable_sectors_url)
+        if response.status_code != 200:
+            raise ValueError(f"Error getting reachable sectors: {response.json()}")
 
-    move_unit_url = (
-        f"{api_prefix}/game/{game_id}/team/{team_id}/"
-        f"unit/{selected_worker_id}/move"
-    )
-    response = requests.post(
-        move_unit_url, json={"targetPosition": selected_sector}
-    )
+        reachable_sectors = response.json()["sectors"]
+        logger.info(f"Reachable sectors: {reachable_sectors}")
 
-    if response.status_code != 200:
-        raise ValueError(f"Error moving unit: {response.json()}")
+        if not reachable_sectors:
+            logger.info("No reachable sectors found. Trying next worker")
+            continue
 
-    logger.info(f"Unit moved to {selected_sector}")
+        selected_sector = reachable_sectors[0]
+
+        move_unit_url = (
+            f"{api_prefix}/game/{game_id}/team/{team_id}/"
+            f"unit/{selected_worker_id}/move"
+        )
+        response = requests.post(
+            move_unit_url, json={"targetPosition": selected_sector}
+        )
+
+        if response.status_code != 200:
+            raise ValueError(f"Error moving unit: {response.json()}")
+
+        logger.info(f"Unit moved to {selected_sector}")
 
     response = requests.post(end_turn_url)
     if response.status_code != 200:
         raise ValueError(f"Error ending turn: {response.json()}")
 
     logger.info("Turn ended")
+
+
+def visualize_map(sectors: list):
+    for row in sectors:
+        for sector in row:
+            if sector is None:
+                print("F", end=",")
+            elif not sector:
+                print(" ", end=",")
+            else:
+                print(sector[0]["type"][0], end=",")
+        print()
 
 
 def main():
@@ -145,8 +170,13 @@ def main():
     first_team = game_info["activeTeamId"]
     other_team = team_2_id if first_team == team_1_id else team_1_id
 
-    perform_turn(game_id, first_team)
-    perform_turn(game_id, other_team)
+    for i in range(5):
+        logger.debug("================================")
+        perform_turn(game_id, first_team)
+        logger.debug("================================")
+        logger.debug("================================")
+        perform_turn(game_id, other_team)
+        logger.debug("================================")
 
 
 if __name__ == "__main__":
