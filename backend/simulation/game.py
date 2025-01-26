@@ -1,7 +1,7 @@
 from typing import Dict, Set
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from consts import TEAMS_NEUTRAL_ID
 from entities.dynamic.buildings.capital import Capital
@@ -10,11 +10,12 @@ from simulation.history import History
 from simulation.map import Map
 from simulation.team import Team
 from utils.logger import get_logger
+from utils.root_model import RootModel
 
 logger = get_logger("game")
 
 
-class Game(BaseModel):
+class Game(RootModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     map: Map
     teams: Dict[str, Team] = Field(default_factory=dict)

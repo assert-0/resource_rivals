@@ -1,5 +1,5 @@
-from pydantic import BaseModel
+from utils.root_model import RootModel
 
 
-class Response(BaseModel):
+class Response(RootModel):
     error: str = ""

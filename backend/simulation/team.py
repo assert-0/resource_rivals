@@ -1,22 +1,23 @@
 from typing import Set, List, Optional
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
-from consts import TEAMS_STARTING_POPULATION
+from consts import TEAMS_STARTING_POPULATION, TEAMS_STARTING_RESOURCES
 from entities.dynamic.units.unit import Unit
 from entities.entity import Entity
 from simulation.map import Map
 from utils.logger import get_logger
 from utils.math import Point
+from utils.root_model import RootModel
 
 logger = get_logger("team")
 
 
-class Resources(BaseModel):
-    food: int = 0
-    wood: int = 0
-    minerals: int = 0
+class Resources(RootModel):
+    food: int = TEAMS_STARTING_RESOURCES[0]
+    wood: int = TEAMS_STARTING_RESOURCES[1]
+    minerals: int = TEAMS_STARTING_RESOURCES[2]
 
     def can_afford(self, cost: "Resources") -> bool:
         return all(
@@ -35,7 +36,7 @@ class Resources(BaseModel):
             )
 
 
-class Team(BaseModel):
+class Team(RootModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     name: str
     visibleArea: Set[Point] = Field(default_factory=set)

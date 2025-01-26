@@ -1,9 +1,11 @@
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import Field
+
+from utils.root_model import RootModel
 
 
-class Action(BaseModel):
+class Action(RootModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     teamId: str
     type: str
@@ -42,8 +44,6 @@ class Action(BaseModel):
         self.__class__ = actual_cls_instance.__class__
         self.__pydantic_private__ = actual_cls_instance.__pydantic_private__
         self.__dict__.update(actual_cls_instance.__dict__)
-
-    model_config = ConfigDict(extra="allow")
 
 
 class ConcreteAction(Action):

@@ -2,10 +2,12 @@ from enum import Enum
 from typing import Callable, Set
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from utils.root_model import RootModel
 
 
-class Observer(BaseModel):
+class Observer(RootModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     callback: Callable
 
@@ -13,7 +15,7 @@ class Observer(BaseModel):
         return hash(self.id)
 
 
-class Observable(BaseModel):
+class Observable(RootModel):
     observers: Set[Observer] = Field(default_factory=set)
 
     def add_observer(self, observer: Observer) -> None:

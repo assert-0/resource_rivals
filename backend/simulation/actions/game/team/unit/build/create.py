@@ -1,5 +1,7 @@
 from typing import Optional
 
+from pydantic import SerializeAsAny
+
 from entities.entity import Entity
 from simulation.actions.action import ConcreteAction
 from simulation.actions.game.team.unit.build.build_action import BuildAction
@@ -12,4 +14,4 @@ class CreateRequest(BuildAction, ConcreteAction):
 
 
 class CreateResponse(Response):
-    building: Optional[Entity]
+    building: Optional[SerializeAsAny[Entity]]

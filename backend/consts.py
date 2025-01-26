@@ -5,6 +5,7 @@ LOG_LEVEL = logging.DEBUG
 
 TEAMS_NEUTRAL_ID = "neutral"
 TEAMS_STARTING_POPULATION = 5
+TEAMS_STARTING_RESOURCES = [10, 10, 10]  # food, wood, minerals
 
 UNITS_CONFIG = {
     "Worker": {
@@ -78,7 +79,7 @@ RESOURCE_COLLECTORS_YIELD = {
     "Farm": 2,
 }
 
-BUILDING_COSTS = {
+BUILDING_COSTS = {  # food, wood, minerals
     "Sawmill": [0, 0, 0],
     "Miner": [0, 0, 0],
     "Farm": [0, 0, 0],

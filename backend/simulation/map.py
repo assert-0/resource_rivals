@@ -1,18 +1,19 @@
 from typing import List, Optional, Set, Collection, Dict
 
-from pydantic import BaseModel
+from pydantic import SerializeAsAny
 
 from consts import TEAMS_NEUTRAL_ID
 from entities.entity import Entity
 from utils.logger import get_logger
 from utils.model_serde import ModelSerde
+from utils.root_model import RootModel
 
 logger = get_logger("map")
 
 
-class Map(BaseModel):
-    sectors: List[List[List[Entity]]]
-    entities: Dict[str, Entity]
+class Map(RootModel):
+    sectors: List[List[List[SerializeAsAny[Entity]]]]
+    entities: Dict[str, SerializeAsAny[Entity]]
     influence: List[List[str]]  # 2D array of team ids
 
     def add_entity(self, entity: Entity):

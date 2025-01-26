@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from utils.root_model import RootModel
 
 
-class Point(BaseModel):
+class Point(RootModel):
     x: int
     y: int
 

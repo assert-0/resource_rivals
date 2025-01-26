@@ -3,10 +3,9 @@ import os
 from importlib import import_module
 from typing import Type, List
 
-from pydantic import BaseModel
-
 from consts import REGISTRY_SEARCH_PATHS, REGISTRY_BASE_CLASSES
 from utils.logger import get_logger
+from utils.root_model import RootModel
 
 logger = get_logger("registry")
 
@@ -17,11 +16,11 @@ class Registry:
 
         self.populate(REGISTRY_BASE_CLASSES)
 
-    def register(self, module_cls: Type[BaseModel]) -> None:
+    def register(self, module_cls: Type[RootModel]) -> None:
         logger.debug(f"Registering {module_cls.get_type()}")  # type: ignore
         self.modules[self._get_key_by_cls(module_cls)] = module_cls
 
-    def get(self, name: str, namespace: str) -> Type[BaseModel]:
+    def get(self, name: str, namespace: str) -> Type[RootModel]:
         module = self.modules.get(self._get_key_by_name(name, namespace), None)
         if module is None:
             raise ValueError(f"Module {name} not found in registry")
@@ -65,7 +64,7 @@ class Registry:
         logger.debug(f"Registered modules: {list(self.modules.keys())}")
 
     @staticmethod
-    def _get_key_by_cls(module_cls: Type[BaseModel]) -> str:
+    def _get_key_by_cls(module_cls: Type[RootModel]) -> str:
         return Registry._get_key_by_name(
             module_cls.get_type(), module_cls.get_namespace()  # type: ignore
         )
