@@ -228,7 +228,7 @@ var unitInfo = [
 	 'obstacles/Mountain', "res://assets/VO-entiteti/mountain/everest.gltf", Vector3(0,0.1,0), Vector3(0,0,0), Vector3(0.3,0.3,0.3),
 	 'resources/Food', "res://assets/VO-entiteti/food/scene.gltf", Vector3(0,0.25,0), Vector3(0,0,0), Vector3(0.9,0.9,0.9),
 	 'resources/Wood', "res://assets/VO-entiteti/wood/scene.gltf", Vector3(0,0.3,0), Vector3(0,0,0), Vector3(0.9,0.9,0.9),
-	 'resources/Mineral', "res://assets/VO-entiteti/mineral/scene.gltf", Vector3(-1,3,1.22), Vector3(0,0,0), Vector3(0.2,0.2,0.2),
+	 'resources/Mineral', "res://assets/VO-entiteti/mineral/scene.gltf", Vector3(-1.085,2.752,1.186), Vector3(0,0,0), Vector3(0.2,0.2,0.2),
 	]
 	
 var unit_data_count 
