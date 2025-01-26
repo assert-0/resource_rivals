@@ -12,9 +12,11 @@ var hitboxes: Array[Array]
 
 var selected_entity: Entity
 
+var unknown = Color("dark gray", 0.20)
 var not_selected = Color("dark gray", 0.06)
 var selected = Color("yellow", 0.3)
 var movable = Color("blue", 0.3)
+var attackable = Color("red", 0.3)
 
 var testing = true
 
@@ -41,13 +43,19 @@ var game: Game
 
 var TEAMS_NEUTRAL_ID = "neutral"
 
-var label: Node
+var resource_label: Node
 
-var map_name: String = "example"
+var unit_label: Node
+
+var team_label: Node
+
+var map_name: String = "example_full" #"example"
 
 var team_names: Array[String] = ["Team 1", "Team 2"]
 
 var buildingCallable = Callable(self, "buildingSelected")
+
+var visible_map_sectors
 
 # var active_team_id: String
 
@@ -68,7 +76,17 @@ class Map:
 		influence = []
 	
 	func setFromJSON(data):
-		sectors = data["sectors"]
+		sectors = []
+		for i in len(data["sectors"]):
+			var temp = []
+			for j in len(data["sectors"]):
+				temp.append([])
+			sectors.append(temp)
+		for i in len(data["sectors"]):
+			for j in len(data["sectors"]):
+				sectors[i][j] = data["sectors"][j][i]
+			 
+		#sectors = data["sectors"]
 		for key in data["entities"].keys():
 			var entity = Entity.new()
 			entity.setFromJSON(data["entities"][key])
@@ -86,7 +104,6 @@ class Map:
 		#print(entities)
 		influence = data["influence"]
 		#print(influence)
-		
 
 class Game:
 	var id: String
@@ -149,6 +166,8 @@ class Team:
 	var name: String
 	var visible_area: Array[Vector2i]
 	var resources: Resources
+	var max_population
+	var is_defeated
 	
 	func _init():
 		visible_area = []
@@ -162,6 +181,8 @@ class Team:
 			visible_area.append(Vector2i(value["x"], value["y"]))
 		#visible_area = data["visibleArea"]
 		resources.setFromJSON(data["resources"])
+		max_population = data["maxPopulation"]
+		is_defeated = data["isDefeated"]
 	
 class Entity:
 	var id: String
@@ -336,7 +357,7 @@ func makeNewUnit(nstype) -> Node:
 	
 	var instance
 	
-	if pos == -1:
+	if allInfo["paths"][pos] == null:
 		instance = basic_unit_preload.instantiate()
 	else:
 		var gltf_document_load = GLTFDocument.new()
@@ -348,6 +369,7 @@ func makeNewUnit(nstype) -> Node:
 			instance.position = allInfo["positions"][pos]
 			instance.rotation = allInfo["rotations"][pos]
 			instance.scale = allInfo["scales"][pos]
+			instance.name = nstype + " " + str(len(units[nstype]["free"])+len(units[nstype]["used"]))
 		else:
 			push_error("Couldn't load glTF scene (error code: %s)." % error_string(error))
 	
@@ -369,17 +391,23 @@ func freeAllUnitsFromEntities():
 		
 	for nstype in unitsAllInfo()["types"]:
 		#print(nstype)
-		#print(units[nstype]["used"])
+		print(units[nstype]["used"])
+		for unit in units[nstype]["used"]:
+			#unit.set_visible(false)
+			print(unit.name)
 		for i in len(units[nstype]["used"]):
 			#print("clear clear " + str(i))
+			units[nstype]["used"][i].set_visible(false)
 			units[nstype]["free"].append(units[nstype]["used"][i])
+			
 			#print(units[nstype]["free"])
 		#print("pre")
 		#print(units[nstype]["free"])
 		
 		units[nstype]["used"].clear()
 		#print("post")
-		#print(units[nstype]["free"])
+		print(units[nstype]["free"])
+		print(units[nstype]["used"])
 		
 	#for nstype in unitsAllInfo()["types"]:
 		#for i in len(units[nstype]["free"]):
@@ -408,9 +436,17 @@ func showUnits(entities):
 		#print(entity)
 		var nstype = entity.ns + "/" + entity.type
 		entity.unit = getFreeUnit(nstype)
-		entity.unit.position.x = positions[entity.position.x][entity.position.y].x
+		entity.unit.position.x = positions[entity.position.x][entity.position.y].z
 		#entity.unit.position.y = positions[entity.position.x][entity.position.y].y
-		entity.unit.position.z = positions[entity.position.x][entity.position.y].z
+		entity.unit.position.z = positions[entity.position.x][entity.position.y].x
+		#if entity.ns == "units":
+			#entity.unit.position.x = positions[entity.position.x][entity.position.y].z
+			##entity.unit.position.y = positions[entity.position.x][entity.position.y].y
+			#entity.unit.position.z = positions[entity.position.x][entity.position.y].x
+		#else:
+			#entity.unit.position.x = positions[entity.position.x][entity.position.y].x
+			##entity.unit.position.y = positions[entity.position.x][entity.position.y].y
+			#entity.unit.position.z = positions[entity.position.x][entity.position.y].z
 		
 var button_text = [
 	"Unit Upgrader",
@@ -456,13 +492,21 @@ func getSectorsAllEntities(sectors):
 	for i in range(field_size):
 		for j in range(field_size):
 			# var sector = game.map.sectors[i][j]
-			var sector = sectors[i][j]
+			var sector = sectors[i][j] #SWAP
 			#print(sector)
 			if sector != null:
+				var resource_id: String = ""
+				var collector_present = false
 				for data in sector:
 					var entity = Entity.new()
 					entity.setFromJSON(data)
+					if entity.ns == "resources":
+						resource_id = entity.id
+					if entity.ns == "buildings/resource_collectors":
+						collector_present = true
 					entities[entity["id"]] = entity
+				if collector_present == true && resource_id != "":
+					entities.erase(resource_id)
 	return entities
 
 # func updateMap(data):
@@ -491,7 +535,11 @@ func _ready():
 		
 	json = JSON.new()
 	
-	label = get_node("UserInterface/Label")
+	resource_label = get_node("UserInterface/ResourceLabel")
+	
+	team_label = get_node("UserInterface/TeamLabel")
+	
+	unit_label = get_node("UserInterface/UnitLabel")
 	
 	basic_unit_preload = preload("res://unit.tscn")
 	
@@ -501,7 +549,7 @@ func _ready():
 	for i in range(len(buttons)):
 		if i != 0:
 			buttons[i].text = button_text[i-1] 
-			buttons[i].pressed.connect(await self.buildingSelected.bind(buttons[i].text))
+			buttons[i].pressed.connect(self.buildingSelected.bind(building_types[i-1]))
 			#buttons[i].connect("pressed", await buildingSelected(buttons[i].text))
 			#self.buildingCallable.connect(buttons[i].pressed)
 		
@@ -604,9 +652,14 @@ func _ready():
 		#add_child(gltf_scene_root_node)
 	#else:
 		#push_error("Couldn't load glTF scene (error code: %s)." % error_string(error))
+		
+	updateResources()
+	updateTeamName()
 
 func updateMap():
 	#print("updating map")
+	
+	updateUnitInfo(null)
 	
 	clearMap()
 	
@@ -614,16 +667,24 @@ func updateMap():
 
 	await getVisibleMap()
 
-	var visible_map_sectors
-
-	if internet_enabled:
-		visible_map_sectors = json.data["sectors"]
-	else:
-		visible_map_sectors = JSON.parse_string('{"sectors":[[[{"id":"1c83c71f-f051-40ba-b591-183e040addd6","position":{"x":0,"y":0},"teamId":"34214631246321463123","type":"Capital","namespace":"buildings"}, {"id":"78e34539-dc79-41c0-99c1-591294f6a9bc","position":{"x":0,"y":0},"teamId":"4532164312","type":"Worker","namespace":"units","health":5,"armor":0,"damage":0,"movementRange":1,"attackRange":0}],[],[],[{"id":"58eb376a-ed8b-4084-be05-0c4c646e23c3","position":{"x":0,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"eda37701-ab8c-4ffc-8365-4952db04768b","position":{"x":1,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"eb19e8af-97c9-447c-8c20-ad44c578c254","position":{"x":2,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b","position":{"x":3,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b","position":{"x":4,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"af948946-2b96-4aca-91a9-867388fe1164","position":{"x":5,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"1d2ce34c-a969-41e1-a284-d9b6b439a598","position":{"x":6,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[],[],[],[],[{"id":"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf","position":{"x":7,"y":7},"teamId":"91463216425320541230","type":"Capital","namespace":"buildings"}]]],"entities":{"1c83c71f-f051-40ba-b591-183e040addd6":{"id":"1c83c71f-f051-40ba-b591-183e040addd6","position":{"x":0,"y":0},"teamId":"34214631246321463123","type":"Capital","namespace":"buildings"},"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf":{"id":"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf","position":{"x":7,"y":7},"teamId":"91463216425320541230","type":"Capital","namespace":"buildings"},"58eb376a-ed8b-4084-be05-0c4c646e23c3":{"id":"58eb376a-ed8b-4084-be05-0c4c646e23c3","position":{"x":0,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"eda37701-ab8c-4ffc-8365-4952db04768b":{"id":"eda37701-ab8c-4ffc-8365-4952db04768b","position":{"x":1,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"eb19e8af-97c9-447c-8c20-ad44c578c254":{"id":"eb19e8af-97c9-447c-8c20-ad44c578c254","position":{"x":2,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b":{"id":"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b","position":{"x":3,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b":{"id":"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b","position":{"x":4,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"af948946-2b96-4aca-91a9-867388fe1164":{"id":"af948946-2b96-4aca-91a9-867388fe1164","position":{"x":5,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"1d2ce34c-a969-41e1-a284-d9b6b439a598":{"id":"1d2ce34c-a969-41e1-a284-d9b6b439a598","position":{"x":6,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}},"influence":[["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"]]}').data["sectors"]
-
 	showUnitsFromData(visible_map_sectors)
 		
 	# updateMap(visible_map_sectors)
+	
+	#TODO add fog of war coloring
+	
+	colorVisibleSectors(visible_map_sectors)
+	
+func colorVisibleSectors(sectors):
+	for i in range(field_size):
+		for j in range(field_size):
+			var cell = hitboxes[i][j]
+			if sectors[j][i] == null:
+				colorObject(cell, unknown)
+			#else if sectors[i][j] == []:
+				#colorObject(cell, color)
+			else:
+				colorObject(cell, not_selected)
 
 func colorObject(object, color):
 	var material = object.get_node("MeshInstance3D").get_active_material(0)
@@ -634,17 +695,20 @@ func colorObject(object, color):
 func getSelectedEntity(location: Vector2i) -> Entity:
 	var top_unit = null
 	
+	var swapped_location = Vector2i(location.y, location.x)
+	
 	#print(game.map.sectors)
 	#print()
 	#print(game.map.sectors[location.x][location.y])
 	
-	if ! game.teams[game.activeTeamId].visible_area.has(location): # neprijateljski unit kaze da nema nista
-		return null
+	#if ! game.teams[game.activeTeamId].visible_area.has(swapped_location): # neprijateljski unit kaze da nema nista
+		#print("not visible??")
+		#return null
 	
-	for unit in game.map.sectors[location.x][location.y]:
+	for unit in game.map.sectors[swapped_location.x][swapped_location.y]:
 		if top_unit == null:
 			top_unit = unit
-		elif top_unit["namespace"] == "buildings":
+		elif top_unit["namespace"] != "units":
 			top_unit = unit
 			
 	if top_unit == null || top_unit["namespace"] != "units":
@@ -684,6 +748,27 @@ func selectedCell(location: Vector2i) -> void:
 	
 	print(selected_entity)
 	
+	
+	
+	var top_unit = null
+	
+	print(visible_map_sectors)
+	
+	var swapped_location = Vector2i(location.y, location.x)
+	
+	if visible_map_sectors[swapped_location.x][swapped_location.y] != null:
+		print("top_unit all = " + str(visible_map_sectors[swapped_location.x][swapped_location.y]))
+		for unit in visible_map_sectors[swapped_location.x][swapped_location.y]:				
+			if top_unit == null:
+				top_unit = unit
+			elif top_unit["namespace"] != "units":
+				top_unit = unit
+				
+			if top_unit!=null:
+				print("top_unit=" + top_unit["namespace"])
+	
+	updateUnitInfo(top_unit)
+	
 	if selected_entity == null:
 		return
 	
@@ -710,23 +795,24 @@ func selectedCell(location: Vector2i) -> void:
 		
 		# passJson(name, body)
 
-		print(json.data)
+		print("availible print" + str(json.data))
 		var available_buldings = json.data["availableBuildings"]
 		
 		var building_select = get_node("UserInterface/BuildingSelect")
 		
-		if available_buldings != []:
+		if available_buldings != null:
 			building_select.set_visible(true)
 		
-		var buttons = building_select.get_children()
-		
-		for i in range(len(buttons)):
-			if i != 0:
-				buttons[i].set_visible(false)
-		
-		for ns_type in available_buldings:
-			var pos = building_types.find(ns_type[1])
-			buttons[pos+1].set_visible(true)
+			var buttons = building_select.get_children()
+			
+			for i in range(len(buttons)):
+				if i != 0:
+					buttons[i].set_visible(false)
+			
+			for ns_type in available_buldings:
+				var pos = building_types.find(ns_type[1])
+				if pos != -1:
+					buttons[pos+1].set_visible(true)
 
 
 		send_name = "selectedCell2"
@@ -793,14 +879,28 @@ func setAvailableMoves(reachable_sectors):
 	if reachable_sectors == null:
 		return
 	for pos in reachable_sectors:
-		availible_moves[pos["x"]][pos["y"]] = 1
+		availible_moves[pos["y"]][pos["x"]] = 1
 		
 func colorAvailableMoves(color):
 	for i in range(field_size):
 		for j in range(field_size):
 			if availible_moves[i][j] != null:
 				var availible_cell = hitboxes[i][j]
-				colorObject(availible_cell, color)
+				#print(1)
+				#print(visible_map_sectors[i][j] != null)
+				#if (visible_map_sectors[i][j] != null):
+					#print(2)
+					#if (len(visible_map_sectors[i][j]) <= 1):
+						#print(visible_map_sectors[i])
+						#print(visible_map_sectors[i][j])
+					#print(len(visible_map_sectors[i][j]) > 1)
+				#if (visible_map_sectors[i][j] != null && len(visible_map_sectors[i][j]) > 1):
+					#print(3)
+					#print(visible_map_sectors[i][j][0].teamId != game.activeTeamId)
+				if visible_map_sectors[i][j] != null && len(visible_map_sectors[i][j]) > 1 && visible_map_sectors[i][j][0].teamId != game.activeTeamId:
+					colorObject(availible_cell, attackable)
+				else:
+					colorObject(availible_cell, color)
 
 
 func clearActions():			
@@ -813,10 +913,13 @@ func clearActions():
 		if i != 0:
 			buttons[i].set_visible(false)
 			
-	colorAvailableMoves(not_selected)
+	#colorAvailableMoves(not_selected)
 	
-	if (selected_cell != null):
-		colorObject(selected_cell, not_selected)
+	if visible_map_sectors != null:
+		colorVisibleSectors(visible_map_sectors)
+	
+	#if (selected_cell != null):
+		#colorObject(selected_cell, not_selected)
 		
 	
 	availible_moves = []
@@ -835,7 +938,7 @@ func move(location):
 			 + "/unit/" + selected_entity.id + "/move"
 		var send_headers = []
 		var send_method = HTTPClient.METHOD_POST
-		var send_data = JSON.stringify({"targetPosition": {"x": location.x, "y": location.y}})
+		var send_data = JSON.stringify({"targetPosition": {"x": location.y, "y": location.x}})
 
 		await awaitResponse(send_name, send_endpoint, send_headers, send_method, send_data)
 
@@ -845,7 +948,7 @@ func move(location):
 	await get_game_info(game.id)
 	await updateMap()
 	
-	print(game.map.sectors[location.x][location.y])
+	#print(game.map.sectors[location.x][location.y])
 
 
 
@@ -895,6 +998,22 @@ func getVisibleMap():
 		# await http_completed
 		
 		# passJson(name, body)
+		
+		print(json.data["sectors"])
+		visible_map_sectors = []
+		for i in len(json.data["sectors"]):
+			var temp = []
+			for j in len(json.data["sectors"]):
+				temp.append([])
+			visible_map_sectors.append(temp)
+		for i in len(json.data["sectors"]):
+			for j in len(json.data["sectors"]):
+				visible_map_sectors[i][j] = json.data["sectors"][j][i]
+				
+		print("visible map" + str(visible_map_sectors))
+		#visible_map_sectors = json.data["sectors"]
+	else:
+		visible_map_sectors = JSON.parse_string('{"sectors":[[[{"id":"1c83c71f-f051-40ba-b591-183e040addd6","position":{"x":0,"y":0},"teamId":"34214631246321463123","type":"Capital","namespace":"buildings"}, {"id":"78e34539-dc79-41c0-99c1-591294f6a9bc","position":{"x":0,"y":0},"teamId":"4532164312","type":"Worker","namespace":"units","health":5,"armor":0,"damage":0,"movementRange":1,"attackRange":0}],[],[],[{"id":"58eb376a-ed8b-4084-be05-0c4c646e23c3","position":{"x":0,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"eda37701-ab8c-4ffc-8365-4952db04768b","position":{"x":1,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"eb19e8af-97c9-447c-8c20-ad44c578c254","position":{"x":2,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b","position":{"x":3,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b","position":{"x":4,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"af948946-2b96-4aca-91a9-867388fe1164","position":{"x":5,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[{"id":"1d2ce34c-a969-41e1-a284-d9b6b439a598","position":{"x":6,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}],[],[],[],[]],[[],[],[],[],[],[],[],[{"id":"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf","position":{"x":7,"y":7},"teamId":"91463216425320541230","type":"Capital","namespace":"buildings"}]]],"entities":{"1c83c71f-f051-40ba-b591-183e040addd6":{"id":"1c83c71f-f051-40ba-b591-183e040addd6","position":{"x":0,"y":0},"teamId":"34214631246321463123","type":"Capital","namespace":"buildings"},"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf":{"id":"9b7ac6e1-0b0a-407e-9bb5-42ebf3773fcf","position":{"x":7,"y":7},"teamId":"91463216425320541230","type":"Capital","namespace":"buildings"},"58eb376a-ed8b-4084-be05-0c4c646e23c3":{"id":"58eb376a-ed8b-4084-be05-0c4c646e23c3","position":{"x":0,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"eda37701-ab8c-4ffc-8365-4952db04768b":{"id":"eda37701-ab8c-4ffc-8365-4952db04768b","position":{"x":1,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"eb19e8af-97c9-447c-8c20-ad44c578c254":{"id":"eb19e8af-97c9-447c-8c20-ad44c578c254","position":{"x":2,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b":{"id":"9f5979f8-b27f-41dd-b2fe-4e4ea20bdf3b","position":{"x":3,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b":{"id":"b84c0038-cfd5-4f89-80b7-cf8135cc9a2b","position":{"x":4,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"af948946-2b96-4aca-91a9-867388fe1164":{"id":"af948946-2b96-4aca-91a9-867388fe1164","position":{"x":5,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"},"1d2ce34c-a969-41e1-a284-d9b6b439a598":{"id":"1d2ce34c-a969-41e1-a284-d9b6b439a598","position":{"x":6,"y":3},"teamId":"neutral","type":"Mountain","namespace":"obstacles"}},"influence":[["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"],["neutral","neutral","neutral","neutral","neutral","neutral","neutral","neutral"]]}').data["sectors"]
 
 func createTeam(game_id: String, team_name: String):
 	if internet_enabled:
@@ -1342,6 +1461,8 @@ func buildingSelected(extra_arg_0: String):
 	#if (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT):
 	print(extra_arg_0)
 	var pos = building_types.find(extra_arg_0)
+	print(building_types)
+	print(pos)
 	if internet_enabled:
 		var send_name = "buildingSelected"
 		var send_endpoint = "/game/"+ game.id +"/team/" + game.activeTeamId + "/unit/" + selected_entity.id + "/build"
@@ -1369,14 +1490,17 @@ func buildingSelected(extra_arg_0: String):
 		#     push_error(name + " buildingSelected")
 		
 		# await http_completed
-		
-		# passJson(name, body)
-
+		passJson(name)
 	
-	print("Built " + body["namespace"] + " "  + body["type"])
+	#
+	#print("Built " + json.data["building"]["namespace"] + " "  + json.data["building"]["type"])
 
+	clearActions()
+	selected_cell = null
 	await get_game_info(game.id)
 	await updateMap()
+	updateResources()
+	updateTeamName()
 	
 func newTurnPressed():
 	if internet_enabled:
@@ -1392,20 +1516,38 @@ func newTurnPressed():
 	clearActions()
 	selected_cell = null
 	await get_game_info(game.id)
+	
+	if game.state == GameStates.FINISHED:
+		#print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+		#get_tree().quit()
+		var end_node = preload("res://GameEnd.tscn").instantiate()
+		end_node.get_child(0).text = str(game.teams[game.winningTeamId].name) + " WON"
+		get_tree().root.add_child(end_node)
+		get_tree().root.remove_child(self)
+		#get_tree().change_scene_to_file("res://GameEnd.tscn")
+		return
+	
 	await updateMap()
 	updateResources()
+	updateTeamName()
 	
 func updateResources():
 	#var resources: Resources
-	#if label.resources == null:
+	#if resource_label.resources == null:
 		#resources = Resources.new()
 	#else:
-		#resources = label.resources
+		#resources = resource_label.resources
 	#resources.food += 1
 	#resources.wood += 1
 	#resources.minerals += 1
 	
-	label.updateResources(game.teams[game.activeTeamId].resources)
+	resource_label.updateResources(game.teams[game.activeTeamId].resources)
+	
+func updateUnitInfo(unit_info):
+	unit_label.updateUnitInfo(unit_info)
+	
+func updateTeamName():
+	team_label.updateTeamName(game.teams[game.activeTeamId].name, game.teams[game.activeTeamId].max_population)
 	
 
 func awaitResponse(send_name: String, send_endpoint: String, send_headers: PackedStringArray, send_method: HTTPClient.Method, send_data: String):
@@ -1425,21 +1567,22 @@ func awaitResponse(send_name: String, send_endpoint: String, send_headers: Packe
 		
 	
 #     var resources: Resources
-#     if label.resources == null:
+#     if resource_label.resources == null:
 #         resources = Resources.new()
 #     else:
-#         resources = label.resources
+#         resources = resource_label.resources
 	
 #     resources.food += 1
 #     resources.wood += 1
 #     resources.minerals += 1
 	
-#     label.updateResources(resources)
+#     resource_label.updateResources(resources)
 	
 func _input(event: InputEvent) -> void:
 	
 	if (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT):
 		clearActions()
+		updateUnitInfo(null)
 		selected_cell = null
 		
 
