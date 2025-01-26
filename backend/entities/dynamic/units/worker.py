@@ -18,7 +18,11 @@ def get_all_other_buildings() -> List[Building]:
     found_buildings = []
 
     for key, module in registry.modules.items():
-        if key.startswith("buildings") and "resource_collectors" not in key:
+        if (
+                key.startswith("buildings")
+                and "resource_collectors" not in key
+                and "capital" not in key
+        ):
             found_buildings.append(module)
 
     return found_buildings
