@@ -1,3 +1,4 @@
+from simulation.consts import GameStates
 from simulation.game import Game
 
 
@@ -15,6 +16,13 @@ class Server:
             if game.id == game_id:
                 return game
         raise ValueError(f"Game with id {game_id} not found")
+
+    def get_running_game(self, game_id: str) -> Game:
+        game = self.get_game(game_id)
+        if game.state != GameStates.IN_PROGRESS:
+            raise ValueError(f"Game with id {game_id} is not running")
+
+        return game
 
     def delete_game(self, game_id: str) -> None:
         for game in self.games:

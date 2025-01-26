@@ -153,7 +153,7 @@ async def get_visible_map(
         game_id: str, team_id: str, response: Response
 ) -> TeamGetVisibleMapResponse:
     try:
-        game = server.get_game(game_id)
+        game = server.get_running_game(game_id)
         team = game.teams[team_id]
         visible_map = team.get_visible_map(game.map)
     except ValueError as e:
@@ -170,7 +170,7 @@ async def end_turn(
         game_id: str, team_id: str, response: Response
 ) -> GenericResponse:
     try:
-        server.get_game(game_id).end_turn()
+        server.get_running_game(game_id).end_turn()
     except ValueError as e:
         response.status_code = 400
         return GenericResponse(error=str(e))
@@ -196,7 +196,7 @@ async def create_building(
         )
 
     try:
-        game = server.get_game(game_id)
+        game = server.get_running_game(game_id)
         unit = game.map.entities[unit_id]
         if not isinstance(unit, Worker):
             raise ValueError(
@@ -221,7 +221,7 @@ async def get_available_buildings(
         game_id: str, team_id: str, unit_id: str, response: Response
 ) -> UnitGetAvailableBuildingsResponse:
     try:
-        game = server.get_game(game_id)
+        game = server.get_running_game(game_id)
         unit = game.map.get_entity_by_id(unit_id)
         if not isinstance(unit, Worker):
             raise ValueError(
@@ -255,7 +255,7 @@ async def move_unit(
         return GenericResponse(error=f"Invalid parameters ({e})")
 
     try:
-        game = server.get_game(game_id)
+        game = server.get_running_game(game_id)
         unit = game.map.get_entity_by_id(unit_id)
         if not isinstance(unit, Unit):
             raise ValueError(
@@ -284,7 +284,7 @@ async def get_reachable_sectors(
         game_id: str, team_id: str, unit_id: str, response: Response
 ) -> UnitGetReachableSectorsResponse:
     try:
-        game = server.get_game(game_id)
+        game = server.get_running_game(game_id)
         unit = game.map.entities[unit_id]
         if not isinstance(unit, Unit):
             raise ValueError(

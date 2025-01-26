@@ -37,6 +37,11 @@ class Game(RootModel):
         return self.teams[self.activeTeamId]
 
     def register_team(self, name: str) -> Team:
+        if self.state != GameStates.BEFORE_START:
+            raise ValueError(
+                f"Game is in bad state to register team ({self.state})"
+            )
+
         logger.info(f"Registering new team: {name}")
         team = Team(name=name)
         self.teams[team.id] = team
@@ -44,6 +49,9 @@ class Game(RootModel):
         return team
 
     def start(self) -> None:
+        if self.state != GameStates.BEFORE_START:
+            raise ValueError(f"Game is in bad state to start ({self.state})")
+
         logger.info(f"Starting game ({self.id})")
         self.state = GameStates.IN_PROGRESS
         self.activeTeamId = list(self.teams.keys())[0]

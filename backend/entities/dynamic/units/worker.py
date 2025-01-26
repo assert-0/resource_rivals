@@ -70,9 +70,9 @@ class Worker(Unit, ConcreteEntity):
                 self._get_building_cost(building_cls)
         ):
             cost = Resources(
-                food=building_instance.cost[0],  # type: ignore
-                wood=building_instance.cost[1],  # type: ignore
-                minerals=building_instance.cost[2],  # type: ignore
+                food=building_instance.get_cost()[0],  # type: ignore
+                wood=building_instance.get_cost()[1],  # type: ignore
+                minerals=building_instance.get_cost()[2],  # type: ignore
             )
 
             game.teams[self.teamId].resources.pay(cost)
@@ -129,7 +129,7 @@ class Worker(Unit, ConcreteEntity):
         )
 
         return Resources(
-            food=building_instance.cost[0],  # type: ignore
-            wood=building_instance.cost[1],  # type: ignore
-            minerals=building_instance.cost[2],  # type: ignore
+            food=building_instance.get_cost()[0],  # type: ignore
+            wood=building_instance.get_cost()[1],  # type: ignore
+            minerals=building_instance.get_cost()[2],  # type: ignore
         )
