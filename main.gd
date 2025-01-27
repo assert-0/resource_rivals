@@ -205,8 +205,8 @@ class Entity:
 		#print(ns)
 	
 var unitInfo = [
-	 'units/AdvancedSoldier', "res://assets/VO-entiteti/soldier/fighter.glb", Vector3(0001,0,-0.028), Vector3(0,0,0), Vector3(0.5,0.5,0.5),
-	 'units/Soldier', "res://assets/VO-entiteti/soldier/fighter.glb", Vector3(0001,0,-0.028), Vector3(0,0,0), Vector3(0.5,0.5,0.5),
+	 'units/AdvancedSoldier', "res://assets/VO-entiteti/soldier/fighter.glb", Vector3(0,0,0), Vector3(0,0,0), Vector3(0.5,0.5,0.5),
+	 'units/Soldier', "res://assets/VO-entiteti/soldier/fighter.glb", Vector3(0,0,0), Vector3(0,0,0), Vector3(0.5,0.5,0.5),
 	 'units/Worker', "res://assets/VO-entiteti/worker/scene.gltf", Vector3(0,0,0), Vector3(0,0.05,0), Vector3(0.4,0.4,0.4),
 	 'units/Tank', "res://assets/VO-entiteti/tank/tank.glb", Vector3(0,0,0), Vector3(0,0,0), Vector3(0.005,0.005,0.005),
 	 'units/Cavalry', "res://assets/VO-entiteti/cavalry/scene.gltf", Vector3(0,0,0), Vector3(0,0,0), Vector3(0.3,0.3,0.3),
