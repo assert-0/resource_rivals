@@ -1,8 +1,1 @@
-Model Information:
-* title:	Food
-* source:	https://sketchfab.com/3d-models/food-5ab165f80fd84edc8a4c96f7448c5b42
-* author:	omw100 (https://sketchfab.com/omw100)
-
-Model License:
-* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
-* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
+"Green Field" (https://skfb.ly/6GIDJ) by Somersby is licensed under Creative Commons Attribution-NonCommercial (http://creativecommons.org/licenses/by-nc/4.0/).

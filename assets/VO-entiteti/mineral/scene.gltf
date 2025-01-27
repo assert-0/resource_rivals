@@ -3,50 +3,50 @@
     {
       "bufferView": 2,
       "componentType": 5126,
-      "count": 65532,
+      "count": 501,
       "max": [
-        1.19234299659729,
-        18.823389053344727,
-        3.865351915359497
+        2.196906328201294,
+        2.031270980834961,
+        3.0195517539978027
       ],
       "min": [
-        -2.251660108566284,
-        15.651750564575195,
-        0.5986570119857788
+        -2.369673252105713,
+        -2.5966579914093018,
+        -0.18802788853645325
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 2,
-      "byteOffset": 786384,
+      "byteOffset": 6012,
       "componentType": 5126,
-      "count": 65532,
+      "count": 501,
       "max": [
-        0.9999929070472717,
-        0.9999907612800598,
-        0.9999966621398926
+        0.9935101270675659,
+        0.99953293800354,
+        0.997218132019043
       ],
       "min": [
-        -0.9999565482139587,
-        -0.9998540282249451,
-        -0.9999960064888
+        -0.999395489692688,
+        -0.9943088889122009,
+        -0.4639507234096527
       ],
       "type": "VEC3"
     },
     {
       "bufferView": 3,
       "componentType": 5126,
-      "count": 65532,
+      "count": 501,
       "max": [
-        0.9411764740943909,
-        0.9058823585510254,
-        0.886274516582489,
+        0.2982670068740845,
+        0.6145932078361511,
+        0.9974844455718994,
         1.0
       ],
       "min": [
-        0.0313725508749485,
-        0.0117647061124444,
-        0.003921568859368563,
+        -0.9973329305648804,
+        -0.8250110745429993,
+        -0.9998355507850647,
         1.0
       ],
       "type": "VEC4"
@@ -54,211 +54,61 @@
     {
       "bufferView": 1,
       "componentType": 5126,
-      "count": 65532,
+      "count": 501,
       "max": [
-        0.9767749905586243,
-        0.9999480247497559
+        0.9759168028831482,
+        0.9769620895385742
       ],
       "min": [
-        0.00010299999848939478,
-        0.025436999276280403
+        0.0199529230594635,
+        0.030070509761571884
       ],
       "type": "VEC2"
     },
     {
       "bufferView": 0,
       "componentType": 5125,
-      "count": 372078,
-      "type": "SCALAR"
-    },
-    {
-      "bufferView": 2,
-      "byteOffset": 1572768,
-      "componentType": 5126,
-      "count": 65534,
-      "max": [
-        1.1725549697875977,
-        18.5886287689209,
-        3.442873954772949
-      ],
-      "min": [
-        -2.6106600761413574,
-        14.674356460571289,
-        -0.558184027671814
-      ],
-      "type": "VEC3"
-    },
-    {
-      "bufferView": 2,
-      "byteOffset": 2359176,
-      "componentType": 5126,
-      "count": 65534,
-      "max": [
-        0.9999825358390808,
-        0.9999127388000488,
-        0.9999665021896362
-      ],
-      "min": [
-        -0.9999508857727051,
-        -0.999986469745636,
-        -0.9999960064888
-      ],
-      "type": "VEC3"
-    },
-    {
-      "bufferView": 3,
-      "byteOffset": 1048512,
-      "componentType": 5126,
-      "count": 65534,
-      "max": [
-        0.95686274766922,
-        0.9254902005195618,
-        0.9254902005195618,
-        1.0
-      ],
-      "min": [
-        0.03529411926865578,
-        0.0235294122248888,
-        0.0,
-        1.0
-      ],
-      "type": "VEC4"
-    },
-    {
-      "bufferView": 1,
-      "byteOffset": 524256,
-      "componentType": 5126,
-      "count": 65534,
-      "max": [
-        0.9898769855499268,
-        0.9999060034751892
-      ],
-      "min": [
-        0.0017460000235587358,
-        2.499999936844688e-05
-      ],
-      "type": "VEC2"
-    },
-    {
-      "bufferView": 0,
-      "byteOffset": 1488312,
-      "componentType": 5125,
-      "count": 362835,
-      "type": "SCALAR"
-    },
-    {
-      "bufferView": 2,
-      "byteOffset": 3145584,
-      "componentType": 5126,
-      "count": 5260,
-      "max": [
-        0.8145020008087158,
-        18.07695770263672,
-        2.4054970741271973
-      ],
-      "min": [
-        -2.259958028793335,
-        14.948139190673828,
-        0.5093110203742981
-      ],
-      "type": "VEC3"
-    },
-    {
-      "bufferView": 2,
-      "byteOffset": 3208704,
-      "componentType": 5126,
-      "count": 5260,
-      "max": [
-        0.9997643828392029,
-        0.9999122619628906,
-        0.984507143497467
-      ],
-      "min": [
-        -0.9997181296348572,
-        -0.9969252347946167,
-        -0.9985736608505249
-      ],
-      "type": "VEC3"
-    },
-    {
-      "bufferView": 3,
-      "byteOffset": 2097056,
-      "componentType": 5126,
-      "count": 5260,
-      "max": [
-        0.9490196108818054,
-        0.9254902005195618,
-        0.9176470637321472,
-        1.0
-      ],
-      "min": [
-        0.07058823853731155,
-        0.03529411926865578,
-        0.003921568859368563,
-        1.0
-      ],
-      "type": "VEC4"
-    },
-    {
-      "bufferView": 1,
-      "byteOffset": 1048528,
-      "componentType": 5126,
-      "count": 5260,
-      "max": [
-        0.9695119857788086,
-        0.9999889731407166
-      ],
-      "min": [
-        0.010828999802470207,
-        0.03729899972677231
-      ],
-      "type": "VEC2"
-    },
-    {
-      "bufferView": 0,
-      "byteOffset": 2939652,
-      "componentType": 5125,
-      "count": 15087,
+      "count": 2880,
       "type": "SCALAR"
     }
   ],
   "asset": {
     "extras": {
-      "author": "Museo [UV] Historia Natural (https://sketchfab.com/MUVHN)",
-      "license": "SKETCHFAB Standard (https://sketchfab.com/licenses)",
-      "source": "https://sketchfab.com/3d-models/magnesite-mineral-ffb21659cc444eb9b475b3dc89176596",
-      "title": "Magnesite mineral"
+      "author": "VX-Designs (https://sketchfab.com/vxdesigns)",
+      "license": "CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)",
+      "source": "https://sketchfab.com/3d-models/iron-ore-free-93118b922cbb48caa4f45b16592fa519",
+      "title": "Iron Ore (FREE)"
     },
-    "generator": "Sketchfab-16.7.0",
+    "generator": "Sketchfab-12.67.0",
     "version": "2.0"
   },
   "bufferViews": [
     {
       "buffer": 0,
-      "byteLength": 3000000,
+      "byteLength": 11520,
       "name": "floatBufferViews",
       "target": 34963
     },
     {
       "buffer": 0,
-      "byteLength": 1090608,
-      "byteOffset": 3000000,
+      "byteLength": 4008,
+      "byteOffset": 11520,
       "byteStride": 8,
       "name": "floatBufferViews",
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 3271824,
-      "byteOffset": 4090608,
+      "byteLength": 12024,
+      "byteOffset": 15528,
       "byteStride": 12,
       "name": "floatBufferViews",
       "target": 34962
     },
     {
       "buffer": 0,
-      "byteLength": 2181216,
-      "byteOffset": 7362432,
+      "byteLength": 8016,
+      "byteOffset": 27552,
       "byteStride": 16,
       "name": "floatBufferViews",
       "target": 34962
@@ -266,71 +116,54 @@
   ],
   "buffers": [
     {
-      "byteLength": 9543648,
+      "byteLength": 35568,
       "uri": "scene.bin"
     }
   ],
   "images": [
     {
-      "uri": "textures/Magnesita_albatera.1001_baseColor.jpeg"
+      "uri": "textures/Material.001_baseColor.png"
+    },
+    {
+      "uri": "textures/Material.001_metallicRoughness.png"
+    },
+    {
+      "uri": "textures/Material.001_normal.png"
     }
   ],
   "materials": [
     {
-      "doubleSided": true,
-      "name": "Magnesita_albatera.1001",
+      "name": "Material.001",
+      "normalTexture": {
+        "index": 2
+      },
+      "occlusionTexture": {
+        "index": 1
+      },
       "pbrMetallicRoughness": {
         "baseColorTexture": {
           "index": 0
         },
-        "metallicFactor": 0.0
+        "metallicFactor": 0.001714939024390244,
+        "metallicRoughnessTexture": {
+          "index": 1
+        },
+        "roughnessFactor": 0.4224466463414634
       }
     }
   ],
   "meshes": [
     {
-      "name": "Object_0",
+      "name": "Roca_Material.001_0",
       "primitives": [
         {
           "attributes": {
-            "COLOR_0": 2,
             "NORMAL": 1,
             "POSITION": 0,
+            "TANGENT": 2,
             "TEXCOORD_0": 3
           },
           "indices": 4,
-          "material": 0,
-          "mode": 4
-        }
-      ]
-    },
-    {
-      "name": "Object_1",
-      "primitives": [
-        {
-          "attributes": {
-            "COLOR_0": 7,
-            "NORMAL": 6,
-            "POSITION": 5,
-            "TEXCOORD_0": 8
-          },
-          "indices": 9,
-          "material": 0,
-          "mode": 4
-        }
-      ]
-    },
-    {
-      "name": "Object_2",
-      "primitives": [
-        {
-          "attributes": {
-            "COLOR_0": 12,
-            "NORMAL": 11,
-            "POSITION": 10,
-            "TEXCOORD_0": 13
-          },
-          "indices": 14,
           "material": 0,
           "mode": 4
         }
@@ -343,17 +176,17 @@
         1
       ],
       "matrix": [
-        0.45289796590805054,
-        -0.14538730680942555,
-        0.8796283006668091,
+        0.002271967940032482,
         0.0,
-        0.23642395436763763,
-        -0.9317081570625304,
-        -0.27572378516197227,
         0.0,
-        0.8596436381340027,
-        0.3328399360179902,
-        -0.3875956833362579,
+        0.0,
+        0.0,
+        5.044782236468497e-19,
+        -0.002271967940032482,
+        0.0,
+        0.0,
+        0.002271967940032482,
+        5.044782236468497e-19,
         0.0,
         0.0,
         0.0,
@@ -364,23 +197,61 @@
     },
     {
       "children": [
-        2,
-        3,
+        2
+      ],
+      "matrix": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "9296b0f9d9e34cbeaa025d9ed3550ae0.fbx"
+    },
+    {
+      "children": [
+        3
+      ],
+      "name": "RootNode"
+    },
+    {
+      "children": [
         4
       ],
-      "name": "Magnesita_albatera.obj.cleaner.materialmerger.gles"
+      "matrix": [
+        100.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -1.629206793918314e-05,
+        -99.99999999999868,
+        0.0,
+        0.0,
+        99.99999999999868,
+        -1.629206793918314e-05,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "Roca"
     },
     {
       "mesh": 0,
-      "name": "Object_2"
-    },
-    {
-      "mesh": 1,
-      "name": "Object_3"
-    },
-    {
-      "mesh": 2,
-      "name": "Object_4"
+      "name": "Roca_Material.001_0"
     }
   ],
   "samplers": [
@@ -404,6 +275,14 @@
     {
       "sampler": 0,
       "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    },
+    {
+      "sampler": 0,
+      "source": 2
     }
   ]
 }

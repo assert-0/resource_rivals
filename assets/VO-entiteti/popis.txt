@@ -38,13 +38,13 @@ Jedinice (units):
 	Cavalry (advanced scout)
 		- 
 	Soldier
-		- https://skfb.ly/oATOX
+		- 
 	Advanced soldier
 		- 
 	Tank
-		- https://www.cgtrader.com/items/3839708/download-page
+		- 
 	Advanced tank
-		- https://www.cgtrader.com/items/5194605/download-page
+		- 
 	Ranged (sniper)
 		- 
 	Advanced ranged
@@ -57,12 +57,6 @@ Statički objekti i resursi:
 	Wood
 		- https://sketchfab.com/3d-models/wood-015ae0ebca81446d948b25b95608de93
 	Mineral
-		- https://sketchfab.com/3d-models/magnesite-mineral-ffb21659cc444eb9b475b3dc89176596
+		- 
 	Food (resursi)
-		- https://sketchfab.com/3d-models/food-5ab165f80fd84edc8a4c96f7448c5b42
-	
-	
-	
-	
-	
-	
+		- 

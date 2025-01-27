@@ -1,8 +1,11 @@
 Model Information:
-* title:	Magnesite mineral
-* source:	https://sketchfab.com/3d-models/magnesite-mineral-ffb21659cc444eb9b475b3dc89176596
-* author:	Museo [UV] Historia Natural (https://sketchfab.com/MUVHN)
+* title:	Iron Ore (FREE)
+* source:	https://sketchfab.com/3d-models/iron-ore-free-93118b922cbb48caa4f45b16592fa519
+* author:	VX-Designs (https://sketchfab.com/vxdesigns)
 
 Model License:
-* license type:	SKETCHFAB Standard (https://sketchfab.com/licenses)
-* requirements:	Under basic restrictions, use worldwide, on all types of media, commercially or not, and in all types of derivative works
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Iron Ore (FREE)" (https://sketchfab.com/3d-models/iron-ore-free-93118b922cbb48caa4f45b16592fa519) by VX-Designs (https://sketchfab.com/vxdesigns) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
