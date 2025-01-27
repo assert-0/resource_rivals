@@ -434,11 +434,13 @@ func showUnits(entities):
 	for key in entities.keys():
 		var entity = entities[key]
 		#print(entity)
+		var allInfo = unitsAllInfo()
 		var nstype = entity.ns + "/" + entity.type
+		var pos = allInfo["types"].find(nstype)
 		entity.unit = getFreeUnit(nstype)
-		entity.unit.position.x = positions[entity.position.x][entity.position.y].z
+		entity.unit.position.x = positions[entity.position.x][entity.position.y].z + allInfo["positions"][pos].x
 		#entity.unit.position.y = positions[entity.position.x][entity.position.y].y
-		entity.unit.position.z = positions[entity.position.x][entity.position.y].x
+		entity.unit.position.z = positions[entity.position.x][entity.position.y].x + allInfo["positions"][pos].z
 		#if entity.ns == "units":
 			#entity.unit.position.x = positions[entity.position.x][entity.position.y].z
 			##entity.unit.position.y = positions[entity.position.x][entity.position.y].y
