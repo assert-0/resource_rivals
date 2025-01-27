@@ -24,10 +24,12 @@ class Map(RootModel):
         self._recalculate_influence()
 
     def remove_entity(self, entity: Entity):
-        self.expect_entity_by_id(entity.id)
+        old_entity = self.expect_entity_by_id(entity.id)
 
-        del self.entities[entity.id]
-        self.sectors[entity.position.y][entity.position.x].remove(entity)
+        del self.entities[old_entity.id]
+        self.sectors[old_entity.position.y][old_entity.position.x].remove(
+            old_entity
+        )
         self._recalculate_influence()
 
     def update_entity(self, entity: Entity):

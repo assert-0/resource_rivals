@@ -26,7 +26,10 @@ class Unit(Entity):
         super().__init__(**kwargs)
 
     def act(self, target_position: Point, _map) -> None:
-        target_sector = _map.sectors[target_position.y][target_position.x]
+        target_sector = _map.get_entities_at_position(
+            target_position.x,
+            target_position.y
+        )
         target = None
 
         for entity in target_sector:
