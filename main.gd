@@ -887,7 +887,7 @@ func colorAvailableMoves(color):
 			if availible_moves[i][j] != null:
 				var availible_cell = hitboxes[i][j]
 				colorObject(availible_cell, color)
-for i in range(field_size):
+	for i in range(field_size):
 		for j in range(field_size):
 			if availible_moves[i][j] != null:
 				var availible_cell = hitboxes[j][i]
