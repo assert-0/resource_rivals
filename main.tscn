@@ -74,6 +74,7 @@ Minerals: 0"
 script = ExtResource("6_h7era")
 
 [node name="UnitLabel" type="Label" parent="UserInterface"]
+layout_mode = 0
 offset_left = 5.0
 offset_top = 149.0
 offset_right = 114.0
@@ -82,6 +83,7 @@ text = "Unit Info"
 script = ExtResource("7_d6j6q")
 
 [node name="TeamLabel" type="Label" parent="UserInterface"]
+layout_mode = 0
 offset_left = 406.0
 offset_top = 6.0
 offset_right = 629.0

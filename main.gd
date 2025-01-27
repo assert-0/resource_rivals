@@ -205,19 +205,19 @@ class Entity:
 		#print(ns)
 	
 var unitInfo = [
-	 'units/AdvancedSoldier', null, null, null, null,
-	 'units/Soldier', "res://assets/VO-entiteti/soldier/scene.gltf", Vector3(0,0,0), Vector3(0,0,0), Vector3(0.5,0.5,0.5),
-	 'units/Worker', "res://assets/VO-entiteti/soldier/scene.gltf", Vector3(0,0,0), Vector3(0,0,0), Vector3(0.5,0.5,0.5), #null, null, null, null,
+	 'units/AdvancedSoldier', "res://assets/VO-entiteti/soldier/fighter.glb", Vector3(0001,-0.437,-0.028), Vector3(0,0,0), Vector3(0.5,0.5,0.5),
+	 'units/Soldier', "res://assets/VO-entiteti/soldier/fighter.glb", Vector3(0001,-0.437,-0.028), Vector3(0,0,0), Vector3(0.5,0.5,0.5),
+	 'units/Worker', "res://assets/VO-entiteti/worker/scene.gltf", Vector3(0,0,0), Vector3(0,0,0), Vector3(0.4,0.4,0.4),
 	 'units/Tank', "res://assets/VO-entiteti/tank/tank.glb", Vector3(0,0,0), Vector3(0,0,0), Vector3(0.4,0.4,0.4),
-	 'units/Calvary', null, null, null, null,
+	 'units/Cavalry', null, null, null, null,
 	 'units/AdvancedRanged', null, null, null, null,
 	 'units/Scout', null, null, null, null,
-	 'units/AdvancedTank', "res://assets/VO-entiteti/advanced_tank/advanced_tank.gltf", Vector3(0,0,0), Vector3(0,0,0), Vector3(0.2,0.2,0.2),
+	 'units/AdvancedTank', null, null, null, null,
 	 'units/Ranged', null, null, null, null,
 	 'buildings/UnitUpgrader', null, null, null, null,
 	 'buildings/Capital', "res://assets/VO-entiteti/main_city/scene.gltf", Vector3(0,0.12,0), Vector3(0,0,0), Vector3(0.1,0.1,0.1),
 	 'buildings/Barracks', null, null, null, null,
-	 'buildings/unit_generators/WorkerGenerator', "res://assets/VO-entiteti/worker_generator/worker_generator.glb", Vector3(0,0,0), Vector3(0,0,0), Vector3(0.004,0.004,0.004),
+	 'buildings/unit_generators/WorkerGenerator', null, null, null, null,
 	 'buildings/unit_generators/SoldierGenerator', null, null, null, null,
 	 'buildings/unit_generators/TankGenerator', null, null, null, null,
 	 'buildings/unit_generators/RangedGenerator', null, null, null, null,
@@ -226,7 +226,7 @@ var unitInfo = [
 	 'buildings/resource_collectors/Sawmill', "res://assets/VO-entiteti/sawmill/scene.gltf", Vector3(0,0.05,0), Vector3(0,0,0), Vector3(0.02,0.02,0.02),
 	 'buildings/resource_collectors/Miner', null, null, null, null,
 	 'obstacles/Mountain', "res://assets/VO-entiteti/mountain/everest.gltf", Vector3(0,0.1,0), Vector3(0,0,0), Vector3(0.3,0.3,0.3),
-	 'resources/Food', "res://assets/VO-entiteti/food/scene.gltf", Vector3(0,0.25,0), Vector3(0,0,0), Vector3(0.9,0.9,0.9),
+	 'resources/Food', null, null, null, null,
 	 'resources/Wood', "res://assets/VO-entiteti/wood/scene.gltf", Vector3(0,0.3,0), Vector3(0,0,0), Vector3(0.9,0.9,0.9),
 	 'resources/Mineral', "res://assets/VO-entiteti/mineral/scene.gltf", Vector3(-1.085,2.752,1.186), Vector3(0,0,0), Vector3(0.2,0.2,0.2),
 	]
@@ -260,7 +260,7 @@ var unit_preloads = {
 	'units/Soldier': Soldier_preload,
 	'units/Worker': Worker_preload,
 	'units/Tank': Tank_preload,
-	'units/Calvary': Calvary_preload,
+	'units/Cavalry': Cavalry_preload,
 	'units/AdvancedRanged': AdvancedRanged_preload,
 	'units/Scout': Scout_preload,
 	'units/AdvancedTank': AdvancedTank_preload,
@@ -286,7 +286,7 @@ var AdvancedSoldier_preload
 var Soldier_preload
 var Worker_preload
 var Tank_preload
-var Calvary_preload
+var Cavalry_preload
 var AdvancedRanged_preload
 var Scout_preload
 var AdvancedTank_preload

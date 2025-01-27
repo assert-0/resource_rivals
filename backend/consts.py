@@ -64,7 +64,7 @@ UNITS_CONFIG = {
         "movementRange": 3,
         "attackRange": 1
     },
-    "Calvary": {
+    "Cavalry": {
         "health": 10,
         "armor": 1,
         "damage": 2,
