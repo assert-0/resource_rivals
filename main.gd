@@ -906,13 +906,10 @@ func colorAvailableMoves(color):
 					#print(visible_map_sectors[i][j][0].teamId != game.activeTeamId)
 				var to_attack: bool = false
 				if visible_map_sectors[i][j] != null:
-					for unit in visible_map_sectors[i][j]:
+					for entity in visible_map_sectors[i][j]:
 						# var other_team_id: String
-						for key in game.teams.keys():
-							if (unit.teamId == game.teams[key].name):
-								
-								#if unit.teamId != game.activeTeamId:
-								to_attack = true
+						if entity.teamId != game.activeTeamId and entity.namespace == "units":
+							to_attack = true
 				# if visible_map_sectors[i][j] != null && len(visible_map_sectors[i][j]) > 1 && visible_map_sectors[i][j][0].teamId != game.activeTeamId:
 				if to_attack:
 					colorObject(availible_cell, attackable)
