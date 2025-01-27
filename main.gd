@@ -886,6 +886,11 @@ func colorAvailableMoves(color):
 		for j in range(field_size):
 			if availible_moves[i][j] != null:
 				var availible_cell = hitboxes[i][j]
+				colorObject(availible_cell, color)
+for i in range(field_size):
+		for j in range(field_size):
+			if availible_moves[i][j] != null:
+				var availible_cell = hitboxes[j][i]
 				#print(1)
 				#print(visible_map_sectors[i][j] != null)
 				#if (visible_map_sectors[i][j] != null):
@@ -900,13 +905,17 @@ func colorAvailableMoves(color):
 				var to_attack: bool = false
 				if visible_map_sectors[i][j] != null:
 					for unit in visible_map_sectors[i][j]:
-						if unit.teamId != game.activeTeamId:
-							to_attack = true
+						# var other_team_id: String
+						for key in game.teams.keys():
+							if (unit.teamId == game.teams[key].name):
+								
+								#if unit.teamId != game.activeTeamId:
+								to_attack = true
 				# if visible_map_sectors[i][j] != null && len(visible_map_sectors[i][j]) > 1 && visible_map_sectors[i][j][0].teamId != game.activeTeamId:
 				if to_attack:
 					colorObject(availible_cell, attackable)
-				else:
-					colorObject(availible_cell, color)
+
+
 
 
 func clearActions():			
