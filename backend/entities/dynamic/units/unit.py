@@ -58,7 +58,10 @@ class Unit(Entity):
             _map.update_entity(self)
 
     def move(self, target: Point, _map) -> None:
-        if target not in self._calculate_sectors_in_range(_map.sectors):
+        if (
+                target
+                not in self._calculate_movable_sectors_in_range(_map.sectors)
+        ):
             raise ValueError("Target is out of range")
 
         if self._is_path_blocked(
@@ -75,7 +78,7 @@ class Unit(Entity):
         logger.debug(f"Calculating reachable sectors for {self}")
         logger.debug(f"Current position: {self.position}")
 
-        sectors_in_range = self._calculate_sectors_in_range(sectors)
+        sectors_in_range = self._calculate_movable_sectors_in_range(sectors)
         reachable_sectors = []
 
         for sector in sectors_in_range:
@@ -84,15 +87,18 @@ class Unit(Entity):
             ):
                 reachable_sectors.append(sector)
 
+        for sector in self._calculate_attackable_sectors_in_range(sectors):
+            if sector not in reachable_sectors:
+                reachable_sectors.append(sector)
+
         logger.debug(f"Reachable sectors: {reachable_sectors}")
 
         return reachable_sectors
 
-    def _calculate_sectors_in_range(
+    def _calculate_movable_sectors_in_range(
             self, sectors: List[List[List[Entity]]]
     ) -> List[Point]:
         movable_sectors = []
-        attackable_sectors = []
 
         for y, row in enumerate(sectors):
             for x, sector in enumerate(row):
@@ -102,6 +108,13 @@ class Unit(Entity):
                 ):
                     movable_sectors.append(Point(x, y))
 
+        return movable_sectors
+
+    def _calculate_attackable_sectors_in_range(
+            self, sectors: List[List[List[Entity]]]
+    ) -> List[Point]:
+        attackable_sectors = []
+
         for y, row in enumerate(sectors):
             for x, sector in enumerate(row):
                 if (
@@ -110,7 +123,7 @@ class Unit(Entity):
                 ):
                     attackable_sectors.append(Point(x, y))
 
-        return movable_sectors + attackable_sectors
+        return attackable_sectors
 
     def _is_path_blocked(
             self,
@@ -154,19 +167,7 @@ class Unit(Entity):
                 sector_free = self._sector_free(
                     sectors[neighbor.y][neighbor.x]
                 )
-                is_last_sector_with_enemy = (
-                        neighbor == end
-                        and self._contains_enemy_unit(
-                            sectors[neighbor.y][neighbor.x]
-                        )
-                )
-                if (
-                        neighbor_unexplored
-                        and (
-                            sector_free
-                            or is_last_sector_with_enemy
-                        )
-                ):
+                if neighbor_unexplored and sector_free:
                     queue.append((neighbor, path_length + 1))
 
         return True
