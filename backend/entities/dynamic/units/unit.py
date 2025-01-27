@@ -84,6 +84,8 @@ class Unit(Entity):
             ):
                 reachable_sectors.append(sector)
 
+        logger.debug(f"Reachable sectors: {reachable_sectors}")
+
         return reachable_sectors
 
     def _calculate_sectors_in_range(
@@ -148,9 +150,22 @@ class Unit(Entity):
                 continue
 
             for neighbor in get_neighbors(current, sectors):
+                neighbor_unexplored = neighbor not in explored
+                sector_free = self._sector_free(
+                    sectors[neighbor.y][neighbor.x]
+                )
+                is_last_sector_with_enemy = (
+                        neighbor == end
+                        and self._contains_enemy_unit(
+                            sectors[neighbor.y][neighbor.x]
+                        )
+                )
                 if (
-                        neighbor not in explored
-                        and self._sector_free(sectors[neighbor.y][neighbor.x])
+                        neighbor_unexplored
+                        and (
+                            sector_free
+                            or is_last_sector_with_enemy
+                        )
                 ):
                     queue.append((neighbor, path_length + 1))
 
