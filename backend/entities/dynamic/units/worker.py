@@ -90,7 +90,9 @@ class Worker(Unit, ConcreteEntity):
         resource_buildings = []
         other_buildings = []
 
-        current_sector = game.map.sectors[self.position.y][self.position.x]
+        current_sector = game.map.get_entities_at_position(
+            self.position.x, self.position.y
+        )
 
         for entity in current_sector:
             if entity.__class__ in RESOURCE_TO_COLLECTOR_MAPPING:
@@ -99,7 +101,7 @@ class Worker(Unit, ConcreteEntity):
                 )
 
         if (
-                game.map.influence[self.position.y][self.position.x]
+                game.map.influence[self.position.x][self.position.y]
                 == self.teamId
                 and len(current_sector) == 1
         ):

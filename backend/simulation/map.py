@@ -20,14 +20,14 @@ class Map(RootModel):
         entity = entity.model_copy(deep=True)
 
         self.entities[entity.id] = entity
-        self.sectors[entity.position.y][entity.position.x].append(entity)
+        self.sectors[entity.position.x][entity.position.y].append(entity)
         self._recalculate_influence()
 
     def remove_entity(self, entity: Entity):
         old_entity = self.expect_entity_by_id(entity.id)
 
         del self.entities[old_entity.id]
-        self.sectors[old_entity.position.y][old_entity.position.x].remove(
+        self.sectors[old_entity.position.x][old_entity.position.y].remove(
             old_entity
         )
         self._recalculate_influence()
@@ -41,16 +41,16 @@ class Map(RootModel):
             logger.debug("Entity is the same, skipping update")
             return
 
-        self.sectors[old_entity.position.y][old_entity.position.x].remove(
+        self.sectors[old_entity.position.x][old_entity.position.y].remove(
             old_entity
         )
 
         self.entities[entity.id] = entity
-        self.sectors[entity.position.y][entity.position.x].append(entity)
+        self.sectors[entity.position.x][entity.position.y].append(entity)
         self._recalculate_influence()
 
     def get_entities_at_position(self, x: int, y: int) -> List[Entity]:
-        return [entity.model_copy(deep=True) for entity in self.sectors[y][x]]
+        return [entity.model_copy(deep=True) for entity in self.sectors[x][y]]
 
     def get_entity_by_id(self, _id: str) -> Optional[Entity]:
         entity = self.entities.get(_id, None)
@@ -89,11 +89,11 @@ class Map(RootModel):
 
     @property
     def width(self) -> int:
-        return len(self.sectors[0])
+        return len(self.sectors)
 
     @property
     def height(self) -> int:
-        return len(self.sectors)
+        return len(self.sectors[0])
 
     @staticmethod
     def from_entities(entities: Collection[Entity], w: int, h: int) -> 'Map':
@@ -105,7 +105,7 @@ class Map(RootModel):
         ]
 
         for entity in entities:
-            sectors[entity.position.y][entity.position.x].append(entity)
+            sectors[entity.position.x][entity.position.y].append(entity)
 
         entities_map = {entity.id: entity for entity in entities}
 

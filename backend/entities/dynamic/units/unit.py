@@ -103,11 +103,11 @@ class Unit(Entity):
     ) -> List[Point]:
         movable_sectors = []
 
-        for y, row in enumerate(sectors):
-            for x, sector in enumerate(row):
+        for x, column in enumerate(sectors):
+            for y, sector in enumerate(column):
                 if (
                         self._check_in_movement_range(Point(x, y))
-                        and self._sector_free(sectors[y][x])
+                        and self._sector_free(sectors[x][y])
                 ):
                     movable_sectors.append(Point(x, y))
 
@@ -118,11 +118,11 @@ class Unit(Entity):
     ) -> List[Point]:
         attackable_sectors = []
 
-        for y, row in enumerate(sectors):
-            for x, sector in enumerate(row):
+        for x, column in enumerate(sectors):
+            for y, sector in enumerate(column):
                 if (
                         self._check_in_attack_range(Point(x, y))
-                        and self._contains_enemy_unit(sectors[y][x])
+                        and self._contains_enemy_unit(sectors[x][y])
                 ):
                     attackable_sectors.append(Point(x, y))
 
@@ -148,8 +148,8 @@ class Unit(Entity):
                     y = current.y + j
 
                     if (
-                            x >= 0 and x < len(sectors[0])
-                            and y >= 0 and y < len(sectors)
+                            x >= 0 and x < len(sectors)
+                            and y >= 0 and y < len(sectors[x])
                     ):
                         neighbors.append(Point(x, y))
 
@@ -168,7 +168,7 @@ class Unit(Entity):
             for neighbor in get_neighbors(current, sectors):
                 neighbor_unexplored = neighbor not in explored
                 sector_free = self._sector_free(
-                    sectors[neighbor.y][neighbor.x]
+                    sectors[neighbor.x][neighbor.y]
                 )
                 if neighbor_unexplored and sector_free:
                     queue.append((neighbor, path_length + 1))

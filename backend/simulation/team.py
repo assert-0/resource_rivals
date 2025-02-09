@@ -75,6 +75,6 @@ class Team(RootModel):
         for x in range(visible_map.width):
             for y in range(visible_map.height):
                 if Point(x, y) not in self.visibleArea:
-                    visible_sectors[y][x] = None
+                    visible_sectors[x][y] = None
 
         return visible_sectors

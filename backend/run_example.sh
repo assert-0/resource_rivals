@@ -1,3 +1,3 @@
 export PYTHONPATH=$(pwd)
 
-python3 "examples/${1}"
+python3 "${1}"
