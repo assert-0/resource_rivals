@@ -7,7 +7,6 @@ from utils.root_model import RootModel
 
 class Action(RootModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
-    teamId: str
     type: str
     namespace: str
 
@@ -29,10 +28,10 @@ class Action(RootModel):
     # This is a hack to turn the base class into a concrete class when
     # deserializing
     def model_post_init(self, *_) -> None:
-        from utils.registry import registry
-
         if isinstance(self, ConcreteAction):
             return
+
+        from utils.registry import registry
 
         actual_cls = registry.get(self.type, self.namespace)
         if not issubclass(actual_cls, Action):

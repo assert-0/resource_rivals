@@ -7,7 +7,8 @@ from simulation.game import Game
 
 
 class CreateRequest(GameAction, ConcreteAction):
-    mapName: str
+    mapName: Optional[str] = None
+    mapPath: Optional[str] = None
 
 
 class CreateResponse(Response):

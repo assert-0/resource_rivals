@@ -1,9 +1,10 @@
-from typing import Dict, Set
+from pathlib import Path
+from typing import Dict, Set, Optional
 from uuid import uuid4
 
 from pydantic import Field
 
-from consts import TEAMS_NEUTRAL_ID
+from consts import TEAMS_NEUTRAL_ID, MAP_DIR
 from entities.dynamic.buildings.capital import Capital
 from simulation.consts import GameStates
 from simulation.history import History
@@ -26,7 +27,23 @@ class Game(RootModel):
     winningTeamId: str = TEAMS_NEUTRAL_ID
 
     @staticmethod
-    def new_game(map_path: str, **__) -> "Game":
+    def new_game(
+            map_path: Optional[str] = None,
+            map_name: Optional[str] = None,
+    ) -> "Game":
+        if map_path is None and map_name is None:
+            raise ValueError("Either map_path or map_name must be provided")
+
+        if map_path is None:
+            base_map_path = f"{MAP_DIR}/{map_name}"
+            for extension in ["json", "yaml"]:
+                map_path = f"{base_map_path}.{extension}"
+                if Path(map_path).exists():
+                    break
+
+            if not map_path:
+                raise ValueError(f"Map {map_name} not found")
+
         logger.info(f"Creating new game with map: {map_path}")
         _map = Map.from_file(map_path)
         game = Game(map=_map)
@@ -34,6 +51,10 @@ class Game(RootModel):
         return game
 
     def get_active_team(self) -> Team:
+        if self.state != GameStates.IN_PROGRESS:
+            raise ValueError(
+                f"Game is in bad state to get active team ({self.state})"
+            )
         return self.teams[self.activeTeamId]
 
     def register_team(self, name: str) -> Team:
@@ -66,6 +87,11 @@ class Game(RootModel):
         logger.info(f"Game started with active team: {self.activeTeamId}")
 
     def end_turn(self) -> None:
+        if self.state != GameStates.IN_PROGRESS:
+            raise ValueError(
+                f"Game is in bad state to end turn ({self.state})"
+            )
+
         logger.info(f"Ending turn for team: {self.activeTeamId}")
 
         if winning_team := self._has_ended():

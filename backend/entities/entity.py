@@ -37,10 +37,10 @@ class Entity(RootModel):
     # This is a hack to turn the base class into a concrete class when
     # deserializing
     def model_post_init(self, *_) -> None:
-        from utils.registry import registry
-
         if isinstance(self, ConcreteEntity):
             return
+
+        from utils.registry import registry
 
         actual_cls = registry.get(self.type, self.namespace)
 

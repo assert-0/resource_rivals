@@ -1,5 +1,8 @@
+from typing import Tuple, List
+
 from client.client import Client
 from utils.logger import get_logger
+from utils.math import Point
 
 logger = get_logger("examples.basic_game")
 client = Client()
@@ -12,7 +15,7 @@ def perform_turn(game_id: str, team_id: str):
     visible_map = client.team_get_visible_map(game_id, team_id)
     client.visualize_map_compact(visible_map, list(teams.keys()))
 
-    available_workers = []
+    available_workers: List[Tuple[str, Point]] = []
 
     for x, column in enumerate(visible_map):
         for y, sector in enumerate(column):
@@ -24,13 +27,14 @@ def perform_turn(game_id: str, team_id: str):
 
             for entity in sector:
                 if (
+                        entity and
                         entity.type == "Worker"
                         and entity.teamId == team_id
                 ):
                     logger.info(f"Friendly worker unit found at {x}, {y}")
                     logger.debug(f"Entity: {entity}")
                     available_workers.append(
-                        [entity.id, entity.position]
+                        (entity.id, entity.position)
                     )
 
     if not available_workers:

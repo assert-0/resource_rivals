@@ -1,10 +1,5 @@
-from pathlib import Path
+from fastapi import APIRouter, Response
 
-from fastapi import APIRouter, Request, Response
-
-from consts import MAP_DIR
-from entities.dynamic.units.unit import Unit
-from entities.dynamic.units.worker import Worker
 from server import server
 from simulation.actions.response import Response as GenericResponse
 from simulation.actions.game.create import (
@@ -33,37 +28,17 @@ from simulation.actions.game.team.unit.move.get_reachable_sectors import (
     GetReachableSectorsResponse as UnitGetReachableSectorsResponse
 )
 
-
 api_router = APIRouter(prefix="/api/v1")
 
 
 @api_router.post("/game", response_model=GameCreateResponse)
 async def create_game(
-        request: Request, response: Response
+        request: GameCreateRequest, response: Response
 ) -> GameCreateResponse:
     try:
-        request = await request.json()
-        parsed_request = GameCreateRequest(**request)
-    except Exception as e:
-        response.status_code = 400
-        return GameCreateResponse(
-            error=f"Invalid parameters ({e})", game=None
-        )
-
-    try:
-        base_map_path = f"{MAP_DIR}/{parsed_request.mapName}"
-        for extension in ["json", "yaml"]:
-            map_path = f"{base_map_path}.{extension}"
-            if Path(map_path).exists():
-                break
-
-        if not Path(map_path).exists():
-            return GameCreateResponse(
-                error=f"Map {parsed_request.mapName} not found", game=None
-            )
-
-        created_game = server.create_game(
-            map_path=map_path
+        created_game = server.game_create(
+            map_name=request.mapName,
+            map_path=request.mapPath,
         )
     except ValueError as e:
         response.status_code = 400
@@ -75,7 +50,7 @@ async def create_game(
 @api_router.get("/game/{game_id}", response_model=GameReadResponse)
 async def read_game(game_id: str, response: Response) -> GameReadResponse:
     try:
-        game = server.get_game(game_id)
+        game = server.game_get_info(game_id)
     except ValueError as e:
         response.status_code = 400
         return GameReadResponse(error=str(e), game=None)
@@ -86,7 +61,7 @@ async def read_game(game_id: str, response: Response) -> GameReadResponse:
 @api_router.delete("/game/{game_id}", response_model=None)
 async def delete_game(game_id: str, response: Response) -> GenericResponse:
     try:
-        server.delete_game(game_id)
+        server.game_delete(game_id)
     except ValueError as e:
         response.status_code = 400
         return GenericResponse(error=str(e))
@@ -97,7 +72,7 @@ async def delete_game(game_id: str, response: Response) -> GenericResponse:
 @api_router.post("/game/{game_id}/start", response_model=None)
 async def start_game(game_id: str, response: Response) -> GenericResponse:
     try:
-        server.get_game(game_id).start()
+        server.game_start(game_id)
     except ValueError as e:
         response.status_code = 400
         return GenericResponse(error=str(e))
@@ -105,23 +80,14 @@ async def start_game(game_id: str, response: Response) -> GenericResponse:
     return GenericResponse()
 
 
-@api_router.post("/game/{game_id}/team", response_model=TeamCreateResponse)
+@api_router.post(
+    "/game/{game_id}/team", response_model=TeamCreateResponse
+)
 async def create_team(
-        game_id: str, request: Request, response: Response
+        game_id: str, request: TeamCreateRequest, response: Response
 ) -> TeamCreateResponse:
     try:
-        request = await request.json()
-        parsed_request = TeamCreateRequest(**request)
-    except Exception as e:
-        response.status_code = 400
-        return TeamCreateResponse(
-            error=f"Invalid parameters ({e})", team=None
-        )
-
-    try:
-        created_team = server.get_game(game_id).register_team(
-            name=parsed_request.name
-        )
+        created_team = server.team_create(game_id, request.name)
     except ValueError as e:
         response.status_code = 400
         return TeamCreateResponse(error=str(e), team=None)
@@ -136,7 +102,7 @@ async def read_team(
         game_id: str, team_id: str, response: Response
 ) -> TeamReadResponse:
     try:
-        team = server.get_game(game_id).teams[team_id]
+        team = server.team_get_info(game_id, team_id)
     except ValueError as e:
         response.status_code = 400
         return TeamReadResponse(error=str(e), team=None)
@@ -152,9 +118,7 @@ async def get_visible_map(
         game_id: str, team_id: str, response: Response
 ) -> TeamGetVisibleMapResponse:
     try:
-        game = server.get_running_game(game_id)
-        team = game.teams[team_id]
-        visible_map = team.get_visible_map(game.map)
+        visible_map = server.team_get_visible_map(game_id, team_id)
     except ValueError as e:
         response.status_code = 400
         return TeamGetVisibleMapResponse(error=str(e), sectors=None)
@@ -169,7 +133,7 @@ async def end_turn(
         game_id: str, team_id: str, response: Response
 ) -> GenericResponse:
     try:
-        server.get_running_game(game_id).end_turn()
+        server.team_end_turn(game_id, team_id)
     except ValueError as e:
         response.status_code = 400
         return GenericResponse(error=str(e))
@@ -183,28 +147,13 @@ async def end_turn(
 )
 async def create_building(
         game_id: str, team_id: str, unit_id: str,
-        request: Request, response: Response
+        request: BuildCreateRequest, response: Response
 ) -> BuildCreateResponse:
     try:
-        request = await request.json()
-        parsed_request = BuildCreateRequest(**request, teamId=team_id)
-    except Exception as e:
-        response.status_code = 400
-        return BuildCreateResponse(
-            error=f"Invalid parameters ({e})", building=None
+        building = server.unit_build(
+            game_id, team_id, unit_id,
+            request.buildingType, request.buildingNamespace
         )
-
-    try:
-        game = server.get_running_game(game_id)
-        unit = game.map.entities[unit_id]
-        if not isinstance(unit, Worker):
-            raise ValueError(
-                f"Only workers can build. Selected unit type: {unit.type}"
-            )
-        building = unit.build(
-            parsed_request.buildingNamespace, parsed_request.buildingType, game
-        )
-        game.teams[team_id].recalculate_visible_area(game.map)
     except ValueError as e:
         response.status_code = 400
         return BuildCreateResponse(error=str(e), building=None)
@@ -220,13 +169,9 @@ async def get_available_buildings(
         game_id: str, team_id: str, unit_id: str, response: Response
 ) -> UnitGetAvailableBuildingsResponse:
     try:
-        game = server.get_running_game(game_id)
-        unit = game.map.expect_entity_by_id(unit_id)
-        if not isinstance(unit, Worker):
-            raise ValueError(
-                f"Only workers can build. Selected unit type: {unit.type}"
-            )
-        available_buildings = unit.calculate_available_buildings(game)
+        available_buildings = server.unit_get_available_buildings(
+            game_id, team_id, unit_id
+        )
     except ValueError as e:
         response.status_code = 400
         return UnitGetAvailableBuildingsResponse(
@@ -244,30 +189,12 @@ async def get_available_buildings(
 )
 async def move_unit(
         game_id: str, team_id: str, unit_id: str,
-        request: Request, response: Response
+        request: MoveCreateRequest, response: Response
 ) -> GenericResponse:
     try:
-        request = await request.json()
-        parsed_request = MoveCreateRequest(**request, teamId=team_id)
-    except Exception as e:
-        response.status_code = 400
-        return GenericResponse(error=f"Invalid parameters ({e})")
-
-    try:
-        game = server.get_running_game(game_id)
-        unit = game.map.expect_entity_by_id(unit_id)
-        if not isinstance(unit, Unit):
-            raise ValueError(
-                f"Only units can move/attack. "
-                f"Selected entity type: {unit.type}"
-            )
-        if unit.teamId != team_id:
-            raise ValueError("Unit does not belong to the team")
-        if unit.id in game.movedUnits:
-            raise ValueError("Unit has already moved this turn")
-        unit.act(parsed_request.targetPosition, game.map)
-        game.movedUnits.add(unit.id)
-        game.teams[team_id].recalculate_visible_area(game.map)
+        server.unit_move(
+            game_id, team_id, unit_id, request.targetPosition
+        )
     except ValueError as e:
         response.status_code = 400
         return GenericResponse(error=str(e))
@@ -283,18 +210,9 @@ async def get_reachable_sectors(
         game_id: str, team_id: str, unit_id: str, response: Response
 ) -> UnitGetReachableSectorsResponse:
     try:
-        game = server.get_running_game(game_id)
-        unit = game.map.expect_entity_by_id(unit_id)
-        if not isinstance(unit, Unit):
-            raise ValueError(
-                f"Only units can move/attack. "
-                f"Selected entity type: {unit.type}"
-            )
-        if unit.teamId != team_id:
-            raise ValueError("Unit does not belong to the team")
-        if unit.id in game.movedUnits:
-            raise ValueError("Unit has already moved this turn")
-        reachable_sectors = unit.calculate_reachable_sectors(game.map.sectors)
+        reachable_sectors = server.unit_get_reachable_sectors(
+            game_id, team_id, unit_id
+        )
     except ValueError as e:
         response.status_code = 400
         return UnitGetReachableSectorsResponse(

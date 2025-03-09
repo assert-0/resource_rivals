@@ -1,4 +1,4 @@
-from typing import List, Callable
+from typing import List, Callable, Optional
 
 import requests
 from tabulate import tabulate
@@ -10,6 +10,21 @@ from simulation.team import Team
 from utils.logger import get_logger
 from utils.math import Point
 
+from simulation.actions.game.create import (
+    CreateRequest as GameCreateRequest
+)
+
+from simulation.actions.game.team.create import (
+    CreateRequest as TeamCreateRequest
+)
+
+from simulation.actions.game.team.unit.build.create import (
+    CreateRequest as BuildCreateRequest
+)
+from simulation.actions.game.team.unit.move.create import (
+    CreateRequest as MoveCreateRequest
+)
+
 logger = get_logger("client")
 
 
@@ -17,11 +32,20 @@ class Client:
     def __init__(self, api_prefix: str = "http://localhost:8000/api/v1"):
         self.api_prefix = api_prefix
 
-    def game_create(self, map_name: str) -> Game:
+    def game_create(
+            self,
+            map_name: Optional[str] = None,
+            map_path: Optional[str] = None,
+    ) -> Game:
         logger.debug("Creating game")
 
         create_game_url = f"{self.api_prefix}/game"
-        response = requests.post(create_game_url, json={"mapName": map_name})
+        response = requests.post(
+            create_game_url, json=GameCreateRequest(  # type: ignore
+                mapName=map_name,
+                mapPath=map_path
+            ).model_dump()
+        )
 
         if response.status_code != 200:
             raise ValueError(f"Error creating game: {response.json()}")
@@ -75,7 +99,11 @@ class Client:
         logger.debug(f"Creating team with name {name}")
 
         create_team_url = f"{self.api_prefix}/game/{game_id}/team"
-        response = requests.post(create_team_url, json={"name": name})
+        response = requests.post(
+            create_team_url, json=TeamCreateRequest(  # type: ignore
+                name=name
+            ).model_dump()
+        )
 
         if response.status_code != 200:
             raise ValueError(f"Error creating team: {response.json()}")
@@ -112,7 +140,7 @@ class Client:
 
     def team_get_visible_map(
             self, game_id: str, team_id: str
-    ) -> List[List[Entity]]:
+    ) -> List[List[Optional[List[Optional[Entity]]]]]:
         logger.debug(f"Getting visible map for team {team_id}")
 
         get_visible_map_url = (
@@ -124,7 +152,7 @@ class Client:
             raise ValueError(f"Error getting visible map: {response.json()}")
 
         try:
-            visible_map = []
+            visible_map: List[List[Optional[List[Optional[Entity]]]]] = []
             for column in response.json()["sectors"]:
                 visible_map.append([])
                 for sector in column:
@@ -195,9 +223,9 @@ class Client:
             f"move"
         )
         response = requests.post(
-            move_unit_url, json={
-                "targetPosition": target_position.model_dump()
-            }
+            move_unit_url, json=MoveCreateRequest(  # type: ignore
+                targetPosition=target_position
+            ).model_dump()
         )
 
         if response.status_code != 200:
@@ -239,22 +267,23 @@ class Client:
             f"build"
         )
         response = requests.post(
-            build_unit_url, json={
-                "buildingType": building_type,
-                "buildingNamespace": building_namespace
-            }
+            build_unit_url, json=BuildCreateRequest(  # type: ignore
+                buildingType=building_type,
+                buildingNamespace=building_namespace,
+            ).model_dump()
         )
 
         if response.status_code != 200:
             raise ValueError(f"Error building: {response.json()}")
 
     def visualize_map(
-            self, sectors: List[List[Entity]], team_ids: List[str],
+            self, sectors: List[List[Optional[List[Optional[Entity]]]]],
+            team_ids: List[str],
             visualization_function: Callable
-    ):
+    ) -> None:
         if TEAMS_NEUTRAL_ID not in team_ids:
             team_ids.insert(0, TEAMS_NEUTRAL_ID)
-        out_data = []
+        out_data: List[List[str]] = []
         for x, column in enumerate(sectors):
             out_data.append([])
             for y, sector in enumerate(column):
@@ -266,11 +295,12 @@ class Client:
         print(tabulate(transposed, headers=()))
 
     def visualize_map_verbose(
-            self, sectors: List[List[Entity]], team_ids: List[str]
-    ):
+            self, sectors: List[List[Optional[List[Optional[Entity]]]]],
+            team_ids: List[str]
+    ) -> None:
         def visualize_sector(
                 sector: List[Entity], x: int, y: int, team_ids: List[str]
-        ):
+        ) -> str:
             if sector is not None:
                 entities = [
                     (
@@ -288,11 +318,12 @@ class Client:
         self.visualize_map(sectors, team_ids, visualize_sector)
 
     def visualize_map_compact(
-            self, sectors: List[List[Entity]], team_ids: List[str]
-    ):
+            self, sectors: List[List[Optional[List[Optional[Entity]]]]],
+            team_ids: List[str]
+    ) -> None:
         def visualize_sector(
                 sector: List[Entity], x: int, y: int, team_ids: List[str]
-        ):
+        ) -> str:
             if sector:
                 entities = ",".join([
                     f"{entity.type[0]}{team_ids.index(entity.teamId)}"
