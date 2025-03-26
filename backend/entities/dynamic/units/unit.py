@@ -1,12 +1,22 @@
-from typing import List, Set
+from typing import List, Set, Optional
 
 from consts import UNITS_CONFIG
 from entities.entity import Entity
 from entities.static.obstacles.obstacle import Obstacle
 from utils.logger import get_logger
 from utils.math import Point
+from utils.root_model import RootModel
 
 logger = get_logger("unit")
+
+
+class UnitMoveResult(RootModel):
+    moved: Optional[bool] = None
+    hitEnemy: Optional[bool] = None
+    killedEnemy: Optional[bool] = None
+    hurt: Optional[bool] = None
+    died: Optional[bool] = None
+    capturedBuilding: Optional[bool] = None
 
 
 class Unit(Entity):
@@ -25,7 +35,7 @@ class Unit(Entity):
 
         super().__init__(**kwargs)
 
-    def act(self, target_position: Point, _map) -> None:
+    def act(self, target_position: Point, _map) -> UnitMoveResult:
         target_sector = _map.get_entities_at_position(
             target_position.x,
             target_position.y
@@ -38,29 +48,43 @@ class Unit(Entity):
                 break
 
         if target is None:
-            self.move(target_position, _map)
+            return self.move(target_position, _map)
         else:
-            self.attack(target, _map)
+            return self.attack(target, _map)
 
-    def attack(self, target: 'Unit', _map) -> None:
+    def attack(self, target: 'Unit', _map) -> UnitMoveResult:
         if not self._check_in_attack_range(target.position):
             raise ValueError("Target is out of range")
 
         if self.teamId == target.teamId:
             raise ValueError("Cannot attack friendly units")
 
+        previous_health = self.health
         target._defend(self, self.damage)
-        if target.health <= 0:
+        killed_target = target.health <= 0
+        if killed_target:
             _map.remove_entity(target)
         else:
             _map.update_entity(target)
 
-        if self.health <= 0:
+        died = self.health <= 0
+        if died:
             _map.remove_entity(self)
         else:
             _map.update_entity(self)
+        current_health = self.health
+        hurt = previous_health != current_health
 
-    def move(self, target: Point, _map) -> None:
+        return UnitMoveResult(
+            moved=False,
+            hitEnemy=True,
+            killedEnemy=target.health <= 0,
+            hurt=hurt,
+            died=died,
+            capturedBuilding=False
+        )
+
+    def move(self, target: Point, _map) -> UnitMoveResult:
         if (
                 target
                 not in self._calculate_movable_sectors_in_range(_map.sectors)
@@ -74,6 +98,19 @@ class Unit(Entity):
 
         self.position = target
         _map.update_entity(self)
+
+        captured_building = False
+        if self._contains_enemy_building(_map.sectors[target.x][target.y]):
+            captured_building = True
+
+        return UnitMoveResult(
+            moved=True,
+            hitEnemy=False,
+            killedEnemy=False,
+            hurt=False,
+            died=False,
+            capturedBuilding=captured_building
+        )
 
     def calculate_reachable_sectors(
             self, sectors: List[List[List[Entity]]]
@@ -261,6 +298,15 @@ class Unit(Entity):
     def _contains_enemy_unit(self, sector: List[Entity]) -> bool:
         for entity in sector:
             if isinstance(entity, Unit) and entity.teamId != self.teamId:
+                return True
+
+        return False
+
+    def _contains_enemy_building(self, sector: List[Entity]) -> bool:
+        from entities.dynamic.buildings.building import Building
+
+        for entity in sector:
+            if isinstance(entity, Building) and entity.teamId != self.teamId:
                 return True
 
         return False

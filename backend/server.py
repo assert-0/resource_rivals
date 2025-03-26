@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from entities.dynamic.buildings.building import Building
-from entities.dynamic.units.unit import Unit
+from entities.dynamic.units.unit import Unit, UnitMoveResult
 from entities.dynamic.units.worker import Worker
 from entities.entity import Entity
 from simulation.consts import GameStates
@@ -103,7 +103,7 @@ class Server:
     def unit_move(
             self, game_id: str, team_id: str, unit_id: str,
             target_position: Point
-    ) -> None:
+    ) -> UnitMoveResult:
         self._team_check_active(game_id, team_id)
         self._unit_check_correct_team(game_id, team_id, unit_id)
         self._unit_check_not_moved(game_id, team_id, unit_id)
@@ -112,9 +112,11 @@ class Server:
         team = self._team_get(game_id, team_id)
         unit = self._unit_get(game_id, unit_id)
 
-        unit.act(target_position, game.map)
+        movement_result = unit.act(target_position, game.map)
         game.movedUnits.add(unit.id)
         team.recalculate_visible_area(game.map)
+
+        return movement_result
 
     def unit_get_available_buildings(
             self, game_id: str, team_id: str, unit_id: str

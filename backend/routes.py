@@ -22,7 +22,7 @@ from simulation.actions.game.team.unit.build.get_available_buildings import (
     GetAvailableBuildingsResponse as UnitGetAvailableBuildingsResponse
 )
 from simulation.actions.game.team.unit.move.create import (
-    CreateRequest as MoveCreateRequest
+    CreateRequest as MoveCreateRequest, CreateResponse as MoveCreateResponse
 )
 from simulation.actions.game.team.unit.move.get_reachable_sectors import (
     GetReachableSectorsResponse as UnitGetReachableSectorsResponse
@@ -190,16 +190,16 @@ async def get_available_buildings(
 async def move_unit(
         game_id: str, team_id: str, unit_id: str,
         request: MoveCreateRequest, response: Response
-) -> GenericResponse:
+) -> MoveCreateResponse:
     try:
-        server.unit_move(
+        movement_result = server.unit_move(
             game_id, team_id, unit_id, request.targetPosition
         )
     except ValueError as e:
         response.status_code = 400
-        return GenericResponse(error=str(e))
+        return MoveCreateResponse(error=str(e))
 
-    return GenericResponse()
+    return MoveCreateResponse(**movement_result.model_dump())
 
 
 @api_router.get(

@@ -56,7 +56,10 @@ def perform_turn(game_id: str, team_id: str):
 
         selected_sector = reachable_sectors[0]
 
-        client.unit_move(game_id, team_id, selected_worker_id, selected_sector)
+        result = client.unit_move(
+            game_id, team_id, selected_worker_id, selected_sector
+        )
+        logger.debug(f"Move result: {result}")
 
         logger.info(f"Unit moved to {selected_sector}")
 

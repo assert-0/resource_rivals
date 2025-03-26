@@ -4,6 +4,7 @@ import requests
 from tabulate import tabulate
 
 from consts import TEAMS_NEUTRAL_ID
+from entities.dynamic.units.unit import UnitMoveResult
 from entities.entity import Entity
 from simulation.game import Game
 from simulation.team import Team
@@ -215,7 +216,7 @@ class Client:
     def unit_move(
             self, game_id: str, team_id: str, unit_id: str,
             target_position: Point
-    ) -> None:
+    ) -> UnitMoveResult:
         logger.debug(f"Moving unit {unit_id} to {target_position}")
 
         move_unit_url = (
@@ -230,6 +231,8 @@ class Client:
 
         if response.status_code != 200:
             raise ValueError(f"Error moving unit: {response.json()}")
+
+        return UnitMoveResult(**response.json())
 
     def unit_get_available_buildings(
             self, game_id: str, team_id: str, unit_id: str
