@@ -241,7 +241,7 @@ class Client:
 
         get_available_buildings_url = (
             f"{self.api_prefix}/game/{game_id}/team/{team_id}/unit/{unit_id}/"
-            f"build/avaliable-buildings"
+            f"build/available-buildings"
         )
         response = requests.get(get_available_buildings_url)
 
@@ -251,7 +251,7 @@ class Client:
             )
 
         try:
-            available_buildings = response.json()["buildings"]
+            available_buildings = response.json()["availableBuildings"]
         except Exception as e:
             raise ValueError(f"Error getting available buildings: {e}")
 
@@ -335,7 +335,7 @@ class Client:
             elif sector is not None:
                 entities = "_"
             else:
-                entities = "F"
+                entities = "~"
 
             return f"{entities}"
 

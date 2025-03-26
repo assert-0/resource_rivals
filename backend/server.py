@@ -141,7 +141,7 @@ class Server:
         game = self._game_expect_running(game_id)
         team = self._team_get(game_id, team_id)
         unit: Worker = self._unit_get(game_id, unit_id)  # type: ignore
-        building = unit.build(building_type, building_namespace, game)
+        building = unit.build(building_namespace, building_type, game)
 
         team.recalculate_visible_area(game.map)
 
