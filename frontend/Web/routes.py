@@ -1,16 +1,12 @@
-import os
-
-from environs import Env
 from fastapi import APIRouter
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 from starlette.templating import Jinja2Templates
 
+from settings import env
+
 api_router = APIRouter(prefix="")
 templates = Jinja2Templates(directory="static/templates/")
-env = Env()
-env.read_env()
-env.str("API_DOMAIN", default="http://localhost:8000")
 
 
 @api_router.get("/index")
@@ -23,6 +19,21 @@ async def get_index(request: Request):
 
     return templates.TemplateResponse(
         name="index.html.jinja2",
+        request=request,
+        context={
+            "env": env.dump(),
+        },
+    )
+
+
+@api_router.get("/game")
+@api_router.get("/game.html")
+def get_game(request: Request):
+    """
+    This is the game route.
+    """
+    return templates.TemplateResponse(
+        name="game.html.jinja2",
         request=request,
         context={
             "env": env.dump(),

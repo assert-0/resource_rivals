@@ -1,172 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Setup</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: #f0f2f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .container {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      width: 90%;
-      max-width: 400px;
-    }
-    h1 { text-align: center; color: #333; }
-    form { display: flex; flex-direction: column; }
-    input, button {
-      padding: .75rem 1rem;
-      margin: .5rem 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1rem;
-      outline: none;
-      transition: border-color .2s;
-    }
-    input:focus { border-color: #007bff; }
-    button {
-      background: #007bff;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-    }
-    button:disabled { background: #aaa; cursor: not-allowed; }
-    p { color: #555; word-break: break-all; }
-    #new-btn { background: #dc3545; }
-    .credits {
-      position: fixed;
-      bottom: 0.5rem;
-      right: 0.5rem;
-      font-size: 0.75rem;
-      color: #007bff;
-      text-decoration: none;
-      background: rgba(255,255,255,0.8);
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      z-index: 1000;
-    }
-    .credits:hover { text-decoration: underline; }
-    @media (min-width: 600px) { .container { padding: 3rem; } }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Setup</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input, button {
+            padding: .75rem 1rem;
+            margin: .5rem 0;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        input:focus {
+            border-color: #007bff;
+        }
+
+        button {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        p {
+            color: #555;
+            word-break: break-all;
+        }
+
+        #new-btn {
+            background: #dc3545;
+        }
+
+        /* ---------- ​FOOTER BUTTONS ---------- */
+        .footer-btn {
+            position: fixed;
+            bottom: 16px; /* ← 16 px = 1 rem on most browsers */
+            padding: 6px 14px; /* top/bottom = 6px, left/right = 14px */
+            font: 700 12px/1.2 sans-serif; /* same font & line-height */
+            border-radius: 4px;
+            box-sizing: border-box; /* height includes padding & border */
+            text-align: center;
+            display: block; /* make the anchor a block-level box */
+            min-width: 70px; /* identical width floor */
+            z-index: 1000;
+            cursor: pointer;
+        }
+
+        /* specific colours */
+        .footer-btn.reset {
+            left: 16px;
+            background: #dc3545;
+            color: #fff;
+            border: none;
+        }
+
+        .footer-btn.credits {
+            right: 16px;
+            background: #ffffffe6; /* 90 % white */
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .footer-btn.credits:hover {
+            text-decoration: underline;
+        }
+
+        @media (min-width: 600px) {
+            .container {
+                padding: 3rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container" id="app"></div>
-  <a href="static/credits.html" class="credits">Credits</a>
+    <div class="container" id="app"></div>
+    <button onclick="window.location = 'static/credits.html'" class="footer-btn credits">Credits</button>
+    <button id="resetBtn" class="footer-btn reset">Reset</button>
 
-  <script type="module">
-    import Client from '/static/client.js';
+    <script type="module">
+        import Client from '/static/client.js';
 
-    const apiUrl = "{{ env.API_DOMAIN | default('window.location.origin') }}";
+        const apiUrl = "{{ env.API_DOMAIN | default('window.location.origin') }}";
 
-    const api = new Client(apiUrl);
-    const app = document.getElementById('app');
+        const api = new Client(apiUrl);
+        const app = document.getElementById('app');
 
-    let state = JSON.parse(localStorage.getItem('gameState') || '{}');
-    const saveState = () => localStorage.setItem('gameState', JSON.stringify(state));
-    const resetState = () => { localStorage.removeItem('gameState'); state = {}; };
+        let state = JSON.parse(localStorage.getItem('gameState') || '{}');
+        const saveState = () => localStorage.setItem('gameState', JSON.stringify(state));
+        const resetState = () => {
+            localStorage.removeItem('gameState');
+            state = {};
+        };
 
-    const params = new URLSearchParams(window.location.search);
-    const urlGame = params.get('gameId');
-    if (!state.gameId && urlGame) {
-      state.gameId = urlGame;
-      state.isCreator = false;
-      saveState();
-    }
-
-    function renderCreate() {
-      app.innerHTML = `
-        <h1>Create Game</h1>
-        <form id="create-form">
-          <input name="mapName" placeholder="Map name (optional)" />
-          <input name="mapPath" placeholder="Map path (optional)" />
-          <button>Create</button>
-        </form>
-      `;
-      document.getElementById('create-form').onsubmit = async e => {
-        e.preventDefault();
-        try {
-          const fm = new FormData(e.target);
-          const opts = { mapName: fm.get('mapName') || null, mapPath: fm.get('mapPath') || null };
-          const { game } = await api.createGame(opts);
-          state = { gameId: game.id, isCreator: true };
-          saveState();
-          const u = new URL(window.location);
-          u.searchParams.set('gameId', game.id);
-          window.history.replaceState({}, '', u);
-          renderTeam();
-        } catch (err) {
-          alert('Error: ' + JSON.stringify(err));
+        const params = new URLSearchParams(window.location.search);
+        const urlGame = params.get('gameId');
+        if (!state.gameId && urlGame) {
+            state.gameId = urlGame;
+            state.isCreator = false;
+            saveState();
         }
-      };
-    }
 
-    function renderTeam() {
-      app.innerHTML = `
-        <h1>Join Game</h1>
-        <p>Game ID: ${state.gameId}</p>
-        <form id="team-form">
-          <input name="teamName" placeholder="Team name" required />
-          <button>Join</button>
-        </form>
-      `;
-      document.getElementById('team-form').onsubmit = async e => {
-        e.preventDefault();
-        try {
-          const name = new FormData(e.target).get('teamName');
-          const { team } = await api.createTeam(state.gameId, name);
-          state.teamId = team.id;
-          state.teamName = name;
-          saveState();
-          renderLobby();
-        } catch (err) {
-          alert('Error: ' + JSON.stringify(err));
+        document.getElementById('resetBtn').onclick = () => {
+            localStorage.clear();          // wipe all game state
+            window.location = '/index.html' // back to main menu
         }
-      };
-    }
 
-    function renderLobby() {
-      app.innerHTML = `
-        <h1>Lobby</h1>
-        <p><strong>Game ID:</strong> ${state.gameId}</p>
-        <p><strong>Your Team:</strong> ${state.teamName}</p>
-        <button id="start-btn" ${state.isCreator ? '' : 'disabled'}>Start Game</button>
-        <button id="new-btn">New Game</button>
-      `;
-      document.getElementById('start-btn').onclick = async () => {
-        try {
-          await api.startGame(state.gameId);
-          resetState();
-          const u = new URL(window.location);
-          u.searchParams.delete('gameId');
-          window.history.replaceState({}, '', u);
-          renderCreate();
-        } catch (err) {
-          alert('Error: ' + JSON.stringify(err));
+        function renderCreate() {
+            app.innerHTML = `
+                <h1>Create Game</h1>
+                <form id="create-form">
+                  <input name="mapName" placeholder="Map name (optional)" />
+                  <input name="mapPath" placeholder="Map path (optional)" />
+                  <button>Create</button>
+                </form>
+            `;
+            document.getElementById('create-form').onsubmit = async e => {
+                e.preventDefault();
+                try {
+                    const fm = new FormData(e.target);
+                    const opts = {
+                        mapName: fm.get('mapName') || null,
+                        mapPath: fm.get('mapPath') || null
+                    };
+                    const game = await api.createGame(opts);
+                    state = {gameId: game.id, isCreator: true};
+                    saveState();
+                    const u = new URL(window.location);
+                    u.searchParams.set('gameId', game.id);
+                    window.history.replaceState({}, '', u);
+                    renderTeam();
+                } catch (err) {
+                    alert('Error: ' + JSON.stringify(err));
+                }
+            };
         }
-      };
-      document.getElementById('new-btn').onclick = () => {
-        resetState();
-        const u = new URL(window.location);
-        u.searchParams.delete('gameId');
-        window.history.replaceState({}, '', u);
-        renderCreate();
-      };
-    }
 
-    if (!state.gameId) renderCreate();
-    else if (!state.teamId) renderTeam();
-    else renderLobby();
-  </script>
-</body>
+        function renderTeam() {
+            app.innerHTML = `
+                <h1>Join Game</h1>
+                <p>Game ID: ${state.gameId}</p>
+                <form id="team-form">
+                  <input name="teamName" placeholder="Team name" required />
+                  <button>Join</button>
+                </form>
+            `;
+            document.getElementById('team-form').onsubmit = async e => {
+                e.preventDefault();
+                try {
+                    const name = new FormData(e.target).get('teamName');
+                    const team = await api.createTeam(state.gameId, name);
+                    state.teamId = team.id;
+                    state.teamName = name;
+                    saveState();
+                    renderLobby();
+                } catch (err) {
+                    alert('Error: ' + JSON.stringify(err));
+                }
+            };
+        }
+
+        function renderLobby() {
+            app.innerHTML = `
+                <h1>Lobby</h1>
+                <p><strong>Game ID:</strong> ${state.gameId}</p>
+                <p><strong>Your Team:</strong> ${state.teamName}</p>
+                <button id="start-btn" ${state.isCreator ? '' : 'disabled'}>Start Game</button>
+                <button id="new-btn">New Game</button>
+            `;
+            document.getElementById('start-btn').onclick = async () => {
+                try {
+                    await api.startGame(state.gameId);
+                    window.location = '/game.html';
+                } catch (err) {
+                    alert('Error: ' + JSON.stringify(err));
+                }
+            };
+            document.getElementById('new-btn').onclick = () => {
+                resetState();
+                const u = new URL(window.location);
+                u.searchParams.delete('gameId');
+                window.history.replaceState({}, '', u);
+                renderCreate();
+            };
+
+            async function checkGameStatus() {
+                try {
+                    const gameInfo = await api.getGameInfo(state.gameId);
+                    if (gameInfo.state === 'in_progress') {
+                        window.location = '/game.html';
+                    }
+                } catch (err) {
+                    console.error('Error checking game status:', err);
+                }
+            }
+
+            // Timer that periodically checks for game start
+            setInterval(checkGameStatus, 1000);
+        }
+
+        if (!state.gameId) renderCreate();
+        else if (!state.teamId) renderTeam();
+        else renderLobby();
+    </script>
+    </body>
 </html>
-

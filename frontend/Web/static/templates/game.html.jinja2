@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Game Board</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #eaeaea;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+            box-sizing: border-box
+        }
+
+        .header {
+            width: 100%;
+            max-width: 960px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: .5rem
+        }
+
+        .resources {
+            display: flex;
+            gap: 1rem
+        }
+
+        .resource {
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+            color: #333
+        }
+
+        .resource img {
+            width: 24px;
+            height: 24px;
+            margin-right: .25rem
+        }
+
+        #turn-indicator {
+            font-size: 1rem;
+            color: #555
+        }
+
+        #infoPanel {
+            width: 100%;
+            max-width: 960px;
+            background: #fff;
+            padding: .5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+            margin-bottom: .5rem;
+            min-height: 3rem;
+            overflow-y: auto
+        }
+
+        /* scroll container adapts */
+        .map-container {
+            width: 100%;
+            max-width: 100%;
+            overflow: auto;
+            background: #fff;
+            padding: .5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1)
+        }
+
+        /* grid is only as big as it needs to be */
+        .map-grid {
+            display: grid;
+            grid-gap: 2px;
+            background: #444;
+            width: fit-content;
+            height: fit-content
+        }
+
+        .tile {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            background: #ddd;
+            box-sizing: border-box;
+            transition: background-color .2s
+        }
+
+        .tile.fog {
+            background: #666
+        }
+
+        .tile.reachable {
+            box-shadow: inset 0 0 0 3px #ff0
+        }
+
+        .tile img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%
+        }
+
+        .build-button {
+            margin: .25rem;
+            padding: .25rem .5rem;
+            font-size: .875rem;
+            border: 1px solid #007bff;
+            border-radius: 4px;
+            background: #fff;
+            color: #007bff;
+            cursor: pointer
+        }
+
+        .build-button:hover {
+            background: #007bff;
+            color: #fff
+        }
+
+        /* footer */
+        .footer-btn {
+            position: fixed;
+            bottom: 16px;
+            padding: 6px 14px;
+            font: 700 12px/1.2 sans-serif;
+            border-radius: 4px;
+            box-sizing: border-box;
+            min-width: 70px;
+            display: block;
+            text-align: center;
+            z-index: 1000;
+            cursor: pointer
+        }
+
+        .footer-btn.reset {
+            left: 16px;
+            background: #dc3545;
+            color: #fff;
+            border: none
+        }
+
+        .footer-btn.credits {
+            right: 16px;
+            background: #ffffffe6;
+            color: #007bff;
+            text-decoration: none
+        }
+
+        .footer-btn.credits:hover {
+            text-decoration: underline
+        }
+
+        .footer-btn.end-turn {
+            left: 50%;
+            transform: translateX(-50%);
+            background: #007bff;
+            color: #fff;
+            border: none
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="resources" id="resources"></div>
+    <div id="turn-indicator"></div>
+</div>
+<div id="infoPanel">Click a tile to see details</div>
+<div class="map-container">
+    <div class="map-grid" id="mapGrid"></div>
+</div>
+
+<button onclick="window.location='static/credits.html'"
+        class="footer-btn credits">Credits
+</button>
+<button id="resetBtn" class="footer-btn reset">Reset</button>
+<button id="endTurnBtn" class="footer-btn end-turn">End Turn</button>
+
+<script type="module">
+    import Client from '/static/client.js';
+    import unitInfo from '/static/units.js';
+
+    /* ------------ helpers ------------- */
+    const randColor = () => {
+        const h = Math.floor(Math.random() * 360);
+        return `hsla(${h},70%,60%,0.35)`;  // transparent pastel
+    };
+    const teamColors = JSON.parse(localStorage.getItem('teamColors') || '{}');
+    const ensureColor = id => {
+        if (id === "neutral") return "#ccc";
+
+        if (!teamColors[id]) {
+            teamColors[id] = randColor();
+            localStorage.setItem('teamColors', JSON.stringify(teamColors));
+        }
+
+        console.log(`teamColors[${id}]`, teamColors[id]);
+        return teamColors[id];
+    };
+
+    /* ------------ state ------------- */
+    document.getElementById('resetBtn').onclick = () => {
+        localStorage.clear();
+        window.location = '/index.html';
+    };
+
+    const apiUrl = "{{ env.API_DOMAIN | default('window.location.origin') }}";
+    const api = new Client(apiUrl);
+    const stored = JSON.parse(localStorage.getItem('gameState') || '{}');
+    if (!stored.gameId || !stored.teamId) {
+        window.location = '/index.html';
+        throw new Error('state missing');
+    }
+    const {gameId, teamId} = stored;
+
+    /* ------------ elements ------------- */
+    const resDiv = document.getElementById('resources');
+    const turnDiv = document.getElementById('turn-indicator');
+    const mapGrid = document.getElementById('mapGrid');
+    const info = document.getElementById('infoPanel');
+
+    /* ------------ vars ------------- */
+    let visibleMap = [], reachable = [], selectedUnitId = null,
+        lastGameInfo = null;
+
+    /* ------------ render ------------- */
+    async function render() {
+        try {
+            lastGameInfo = await api.getGameInfo(gameId);
+            const teamInfo = await api.getTeamInfo(gameId, teamId);
+            visibleMap = await api.getVisibleMap(gameId, teamId);
+
+            // resources
+            resDiv.innerHTML = '';
+            [['wood', 'static/icons/resources/wood.png'], ['food', 'static/icons/resources/food.png'], ['minerals', 'static/icons/resources/mineral.png']].forEach(([k, i]) => {
+                const d = document.createElement('div');
+                d.className = 'resource';
+                d.innerHTML = `<img src="${i}"><span>${teamInfo.resources[k] || 0}</span>`;
+                resDiv.appendChild(d);
+            });
+
+            // turn
+            turnDiv.textContent = lastGameInfo.activeTeamId === teamId ? 'Your Turn' : 'Waiting…';
+
+            // grid
+            const cols = visibleMap.length, rows = visibleMap[0]?.length || 0;
+            mapGrid.style.gridTemplateColumns = `repeat(${cols},48px)`;
+            mapGrid.innerHTML = '';
+            for (let x = 0; x < cols; x++) {
+                for (let y = 0; y < rows; y++) {
+                    const tile = document.createElement('div');
+                    tile.className = 'tile';
+                    tile.dataset.x = x;
+                    tile.dataset.y = y;
+                    const sec = visibleMap[x][y];
+                    if (sec === null) {
+                        tile.classList.add('fog');
+                    } else if (sec.length) {
+                        const top = sec[sec.length - 1];
+                        if (top) {
+                            tile.style.backgroundColor = ensureColor(top.teamId);
+                            const info = unitInfo[`${top.namespace}/${top.type}`] || unitInfo[top.namespace];
+                            if (info) {
+                                const img = document.createElement('img');
+                                img.src = info.image;
+                                img.alt = info.name;
+                                tile.appendChild(img);
+                            }
+                        }
+                    }
+                    if (reachable.some(p => p.x === x && p.y === y)) tile.classList.add('reachable');
+                    tile.onclick = onTileClick;
+                    mapGrid.appendChild(tile);
+                }
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function clearSelection() {
+        reachable = [];
+        selectedUnitId = null;
+    }
+
+    async function onTileClick(e) {
+        const x = +e.currentTarget.dataset.x, y = +e.currentTarget.dataset.y;
+        if (selectedUnitId && reachable.some(p => p.x === x && p.y === y)) {
+            await api.moveUnit(gameId, teamId, selectedUnitId, {x, y});
+            clearSelection();
+            return render();
+        }
+        clearSelection();
+        info.textContent = '';
+        const sector = visibleMap[x][y];
+        if (!sector || !sector.length) {
+            info.textContent = 'Empty sector';
+            return;
+        }
+        for (const ent of sector) {
+            const inf = unitInfo[`${ent.namespace}/${ent.type}`] || unitInfo[ent.namespace] || {};
+            const d = document.createElement('div');
+            if (ent.namespace === 'units') {
+                d.innerHTML = `<b>${inf.name || ent.type}</b> (HP: ${ent.health})`;
+            } else {
+                d.innerHTML = `<b>${inf.name || ent.type}</b>`;
+            }
+            info.appendChild(d);
+            if (ent.teamId === teamId && ent.namespace === 'units' && lastGameInfo.activeTeamId === teamId) {
+                selectedUnitId = ent.id;
+                try {
+                    reachable = await api.getReachableSectors(gameId, teamId, ent.id);
+                } catch {
+                }
+                if (ent.type === 'Worker') {
+                    try {
+                        const builds = await api.getAvailableBuildings(gameId, teamId, ent.id);
+                        if (builds.length) {
+                            const h = document.createElement('div');
+                            h.textContent = 'Build:';
+                            info.appendChild(h);
+                            builds.forEach(([ns, ty]) => {
+                                const b = document.createElement('button');
+                                b.className = 'build-button';
+                                b.textContent = (unitInfo[`${ns}/${ty}`] || unitInfo[ns] || {name: ty}).name;
+                                b.onclick = async () => {
+                                    await api.buildUnit(gameId, teamId, ent.id, ty, ns);
+                                    clearSelection();
+                                    render();
+                                };
+                                info.appendChild(b);
+                            });
+                        }
+                    } catch {
+                    }
+                }
+            }
+        }
+        render();
+    }
+
+    document.getElementById('endTurnBtn').onclick = async () => {
+        try {
+            await api.endTurn(gameId, teamId);
+            render();
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    render();
+    setInterval(render, 1000);
+</script>
+</body>
+</html>
