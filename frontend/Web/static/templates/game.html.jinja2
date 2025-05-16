@@ -203,10 +203,14 @@
         return teamColors[id];
     };
 
-    /* ------------ state ------------- */
-    document.getElementById('resetBtn').onclick = () => {
+    const reset = () => {
         localStorage.clear();
         window.location = '/index.html';
+    };
+
+    /* ------------ state ------------- */
+    document.getElementById('resetBtn').onclick = () => {
+        reset();
     };
 
     const apiUrl = "{{ env.API_DOMAIN | default('window.location.origin') }}";
@@ -232,6 +236,18 @@
     async function render() {
         try {
             lastGameInfo = await api.getGameInfo(gameId);
+
+            if (lastGameInfo.state === 'finished') {
+                const winningTeam = lastGameInfo.teams[lastGameInfo.winningTeamId];
+                if (!winningTeam) {
+                    alert('Game ended! No winning team.');
+                } else {
+                    alert('Game ended! Winning team: ' + winningTeam.name);
+                }
+                reset();
+                return;
+            }
+
             const teamInfo = await api.getTeamInfo(gameId, teamId);
             visibleMap = await api.getVisibleMap(gameId, teamId);
 
@@ -279,7 +295,12 @@
                 }
             }
         } catch (err) {
-            console.error(err);
+            if (err.message) {
+                console.error(err);
+            } else {
+                console.error('Unknown error occured!');
+                reset();
+            }
         }
     }
 
@@ -306,7 +327,9 @@
             const inf = unitInfo[`${ent.namespace}/${ent.type}`] || unitInfo[ent.namespace] || {};
             const d = document.createElement('div');
             if (ent.namespace === 'units') {
-                d.innerHTML = `<b>${inf.name || ent.type}</b> (HP: ${ent.health})`;
+                d.innerHTML = `<b>${inf.name || ent.type}</b> (HP: ${ent.health}, DMG: ${ent.damage}, ARM: ${ent.armor})`;
+            } else if (ent.namespace === 'buildings/resource_collectors') {
+                d.innerHTML = `<b>${inf.name || ent.type}</b> (Yield: 2)`;
             } else {
                 d.innerHTML = `<b>${inf.name || ent.type}</b>`;
             }
@@ -354,7 +377,7 @@
     };
 
     render();
-    setInterval(render, 1000);
+    setInterval(render, 1500);
 </script>
 </body>
 </html>
